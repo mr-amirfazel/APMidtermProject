@@ -5,14 +5,23 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
-    public static void main(String[] args) {
+       private int port;
+      private  Socket socket;
+      private String username;
+
+    public Client() { }
+
+    public Client(int port) {
+        this.port = port;
+    }
+    public void serverReach(){
         Scanner scanner = new Scanner(System.in);
         try {
-            Socket socket = new Socket("127.0.0.1",8085);
+            Socket socket = new Socket("127.0.0.1",port);
             System.out.println("connected to server");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-
+            objectOutputStream.writeObject(username);
             System.out.println("enter message down below:");
             Client c1 = new Client();
             Client.SelfView selfView = c1.new SelfView(objectInputStream);
@@ -27,7 +36,20 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("enter the entry port:");
+        int prt =scanner.nextInt();scanner.nextLine();
+        Client cl = new Client(prt);
+        System.out.println("enter name:");
+        cl.setUsername(scanner.nextLine());
+        cl.serverReach();
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public class SelfView implements Runnable{

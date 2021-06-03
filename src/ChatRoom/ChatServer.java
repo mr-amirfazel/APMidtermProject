@@ -2,12 +2,11 @@ package ChatRoom;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server {
+public class ChatServer {
     private static int i=1;
     private static Vector<Handler> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(6);
@@ -19,14 +18,17 @@ public class Server {
                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
                 System.out.println("client is connected from port: " + socket.getPort());
-                Server s1 = new Server();
-                Server.Handler handler= s1.new Handler(clients,socket,"client"+i,objectInputStream,objectOutputStream);
+                ChatServer s1 = new ChatServer();
+                String name =(String) objectInputStream.readObject();
+                ChatServer.Handler handler= s1.new Handler(clients,socket,name,objectInputStream,objectOutputStream);
                 clients.add(handler);
                 pool.execute(handler);
                 i++;
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
