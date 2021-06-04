@@ -1,6 +1,7 @@
 package ChatRoom;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -34,9 +35,14 @@ public class Client {
                 objectOutputStream.writeObject(tst);
                 tst = scanner.nextLine();
             }
-        } catch (IOException e) {
+        }
+        catch(ConnectException e){
+            System.out.println("no server running on port : "+port);
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public static void main(String[] args) {

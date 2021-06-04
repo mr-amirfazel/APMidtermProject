@@ -49,19 +49,19 @@ public class ChatServer {
             this.name = name;
             this.objectInputStream = objectInputStream;
             this.objectOutputStream = objectOutputStream;
-            setRoleTag();
+            //setRoleTag();
         }
 
-        private void setRoleTag() {
-           int i = 0;
-            RoleTag arr[]=RoleTag.values();
-            Collections.shuffle(Arrays.asList(arr));
-           for (RoleTag rt:arr)
-           {
-               clients.get(i).roleTag=rt;
-               i++;
-           }
-        }
+//        private void setRoleTag() {
+//           int i = 0;
+//            RoleTag arr[]=RoleTag.values();
+//            Collections.shuffle(Arrays.asList(arr));
+//           for (RoleTag rt:arr)
+//           {
+//               clients.get(i).roleTag=rt;
+//               i++;
+//           }
+//        }
 
         /**
          * When an object implementing interface <code>Runnable</code> is used

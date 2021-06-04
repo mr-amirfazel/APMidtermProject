@@ -1,11 +1,13 @@
 import Roles.Role;
 
 public class Player {
+
     String username;
     Role role;
 
     public Player(String username) {
         this.username = username;
+
     }
 
     /**
@@ -23,4 +25,6 @@ public class Player {
     public void setRole(Role role) {
         this.role = role;
     }
+
+
 }
