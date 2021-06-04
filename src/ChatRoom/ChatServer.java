@@ -2,6 +2,8 @@ package ChatRoom;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,9 +19,9 @@ public class ChatServer {
                 Socket socket = serverSocket.accept();
                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-                System.out.println("client is connected from port: " + socket.getPort());
                 ChatServer s1 = new ChatServer();
                 String name =(String) objectInputStream.readObject();
+                System.out.println(name+" is connected from port: " + socket.getPort());
                 ChatServer.Handler handler= s1.new Handler(clients,socket,name,objectInputStream,objectOutputStream);
                 clients.add(handler);
                 pool.execute(handler);
@@ -36,6 +38,7 @@ public class ChatServer {
         private Vector<Handler> clients = new Vector<>();
         private Socket socket;
         private String name;
+        private RoleTag roleTag;
 
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
@@ -46,6 +49,18 @@ public class ChatServer {
             this.name = name;
             this.objectInputStream = objectInputStream;
             this.objectOutputStream = objectOutputStream;
+            setRoleTag();
+        }
+
+        private void setRoleTag() {
+           int i = 0;
+            RoleTag arr[]=RoleTag.values();
+            Collections.shuffle(Arrays.asList(arr));
+           for (RoleTag rt:arr)
+           {
+               clients.get(i).roleTag=rt;
+               i++;
+           }
         }
 
         /**
@@ -68,6 +83,8 @@ public class ChatServer {
                 while (true){
                     tst = (String)objectInputStream.readObject();
                     for (Handler h : clients) {
+                        if (tst.equals("")||tst.equals(null))
+                            continue;
                         h.objectOutputStream.writeObject(name+" : "+tst);
                     }
                 }

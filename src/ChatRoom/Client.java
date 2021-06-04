@@ -8,6 +8,7 @@ public class Client {
        private int port;
       private  Socket socket;
       private String username;
+      private String RoleTag;
 
     public Client() { }
 
