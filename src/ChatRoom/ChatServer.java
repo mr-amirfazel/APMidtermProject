@@ -22,9 +22,10 @@ public class ChatServer {
                 ChatServer s1 = new ChatServer();
                 String name =(String) objectInputStream.readObject();
                 System.out.println(name+" is connected from port: " + socket.getPort());
-                ChatServer.Handler handler= s1.new Handler(clients,socket,name,objectInputStream,objectOutputStream);
+                ChatServer.Handler handler= s1.new Handler(clients,name,objectInputStream,objectOutputStream);
                 clients.add(handler);
                 pool.execute(handler);
+
                 i++;
             }
 
@@ -36,32 +37,20 @@ public class ChatServer {
     }
     public class Handler implements Runnable{
         private Vector<Handler> clients = new Vector<>();
-        private Socket socket;
+
         private String name;
         private RoleTag roleTag;
 
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
 
-        public Handler(Vector<Handler> clients, Socket socket, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+        public Handler(Vector<Handler> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
             this.clients = clients;
-            this.socket = socket;
             this.name = name;
             this.objectInputStream = objectInputStream;
             this.objectOutputStream = objectOutputStream;
-            //setRoleTag();
-        }
 
-//        private void setRoleTag() {
-//           int i = 0;
-//            RoleTag arr[]=RoleTag.values();
-//            Collections.shuffle(Arrays.asList(arr));
-//           for (RoleTag rt:arr)
-//           {
-//               clients.get(i).roleTag=rt;
-//               i++;
-//           }
-//        }
+        }
 
         /**
          * When an object implementing interface <code>Runnable</code> is used
@@ -76,6 +65,7 @@ public class ChatServer {
          */
         @Override
         public void run() {
+
 
             try {
                 String tst;

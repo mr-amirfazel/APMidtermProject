@@ -80,4 +80,12 @@ public class GameManager {
             }
         return isAllowed;
     }
+
+    /**
+     *
+     * @return
+     */
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
 }

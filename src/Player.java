@@ -2,12 +2,11 @@ import Roles.Role;
 
 public class Player {
 
-    String username;
-    Role role;
+    private String username;
+    private Role role;
 
     public Player(String username) {
-        this.username = username;
-
+        this.setUsername(username);
     }
 
     /**
@@ -26,5 +25,16 @@ public class Player {
         this.role = role;
     }
 
+    @Override
+    public String toString() {
+        return getUsername() +" : "+ getRole().getClass();
+    }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
