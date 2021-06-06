@@ -36,12 +36,16 @@ public class God {
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
                 String name = playerAdd();
+                names.add(name);
                 gameManager.addPlayer(new Player(name));
                 System.out.println(name+" is connected from port: " + socket.getPort());
+                String c =(String)objectInputStream.readObject();
+                gameManager.addReadyState(c);
                 God.SendAssist sendAssist = god.new SendAssist(clients,name,objectInputStream,objectOutputStream);
-//                readyCheck();
                 clients.add(sendAssist);
-                //pool.execute();
+
+             //   sendAssist.setBroadCastMsg("everyone is ready we will begin in 3..2...1");
+              //  pool.execute(sendAssist);
 
 
 
@@ -52,6 +56,8 @@ public class God {
 
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -93,16 +99,16 @@ public class God {
             e.printStackTrace();
         }
 
-        return name;
+       return name;
     }
     public  boolean isValidName(String name)
     {
         boolean isVal = true;
-        for (Player p:gameManager.getPlayers())
+        for (String Name:names)
         {
-            if (p.getUsername().equals(name))
+            if (Name.equals(name)){
                 isVal=false;
-            break;
+            break;}
         }
         return isVal;
     }

@@ -30,17 +30,21 @@ public class GameClient {
     public void godConnect(){
         Scanner scanner = new Scanner(System.in);
         try(Socket socket = new Socket("127.0.0.1",port);) {
-            System.out.println("connected to server");
+            System.out.println("connected to server\n waiting for  other players...");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
              objectInputStream = new ObjectInputStream(socket.getInputStream());
              String name = playerAdd();
             setUsername(name);
             objectOutputStream.writeObject(username);
             System.out.println("Dear "+username+", you are officially a part of the game");
+            boolean isready =readySet();
+            if (isready)
+            objectOutputStream.writeObject("true");
+            System.out.println("you are set . waiting for other players to get ready...");
             GameClient gameClient = new GameClient();
             GameClient.ReadAssist readAssist = gameClient.new ReadAssist(objectInputStream);
             Thread t1 = new Thread(readAssist);
-          //  t1.start();
+         //   t1.start();
         }
 
         catch(ConnectException e){
@@ -54,20 +58,19 @@ public class GameClient {
 //        }
 
     }
-    public void readySet() throws IOException {
+    public boolean readySet() throws IOException {
+        boolean iscor =false;
         Scanner scanner = new Scanner(System.in);
-        Character c;
-        do {
-            try {
-                System.out.println((String)objectInputStream.readObject());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            c = scanner.next().charAt(0);
-            objectOutputStream.writeObject(c);
-        }while (c!='y');
+        char c;
+       while (true) {
+           System.out.println("are you ready???");
+           c = scanner.next().charAt(0);
+           if (c == 'y') {
+               iscor=true;
+               break;
+           }
+       }
+        return iscor;
     }
 
 

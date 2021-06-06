@@ -5,7 +5,7 @@ import java.util.Collections;
 
 public class GameManager {
     private static final int MAXUSERS = 10;
-    private ArrayList<Character> readySets;
+    private ArrayList<String> readySets;
     private ArrayList<Player> players;
     private ArrayList<Role> roles;
 
@@ -67,17 +67,13 @@ public class GameManager {
      * to show if a client is ready yo start or not
      * @param ready
      */
-    public void addReadyState(Character ready){
+    public void addReadyState(String ready){
         readySets.add(ready);
     }
     public boolean startAllowance(){
         boolean isAllowed = true;
-        for (Character ch:readySets)
-            if(ch !='y')
-            {
-                isAllowed = false;
-                break;
-            }
+        if (readySets.size()==MAXUSERS)
+            isAllowed=true;
         return isAllowed;
     }
 
