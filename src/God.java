@@ -1,3 +1,4 @@
+import ChatRoom.ChatServer;
 import ChatRoom.RoleTag;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.concurrent.Executors;
 public class God {
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    private static final int MAXUSERS=10;
+    private static final int MAXUSERS=3;
     private static Vector<SendAssist> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(MAXUSERS);
     private GameManager gameManager;
@@ -26,34 +27,28 @@ public class God {
     }
 
     public void godRun(God god){
-        Random rand = new Random();
-        int port = rand.nextInt(7000)+3000;
-        try( ServerSocket serverSocket = new ServerSocket(port)) {
+        God.SendAssist sendAssist= null;
+        int port = randomPort();
+        try(ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("God has just started a game running on "+port+"\n waiting for players to join...");
             int userCounter=0;
-            while (userCounter<MAXUSERS){
-                Socket socket = serverSocket.accept();
-                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                objectInputStream = new ObjectInputStream(socket.getInputStream());
-                String name = playerAdd();
-                names.add(name);
-                gameManager.addPlayer(new Player(name));
-                System.out.println(name+" is connected from port: " + socket.getPort());
-                String c =(String)objectInputStream.readObject();
-                gameManager.addReadyState(c);
-                God.SendAssist sendAssist = god.new SendAssist(clients,name,objectInputStream,objectOutputStream);
-                clients.add(sendAssist);
+            while(true) {
 
-             //   sendAssist.setBroadCastMsg("everyone is ready we will begin in 3..2...1");
-              //  pool.execute(sendAssist);
+                    Socket socket = serverSocket.accept();
+                    objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                    objectInputStream = new ObjectInputStream(socket.getInputStream());
+                    String name = playerAdd();
+                    names.add(name);
+                    gameManager.addPlayer(new Player(name));
+                    System.out.println(name + " is connected from port: " + socket.getPort());
+                    String c = (String) objectInputStream.readObject();
+                    gameManager.addReadyState(c);
+                    sendAssist = god.new SendAssist(clients, name, objectInputStream, objectOutputStream,gameManager);
+                    clients.add(sendAssist);
+                    pool.execute(sendAssist);
+                    userCounter++;
 
-
-
-
-
-                userCounter++;
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,7 +107,11 @@ public class God {
         }
         return isVal;
     }
-
+    public int randomPort(){
+        Random rand = new Random();
+        int port = rand.nextInt(7000)+3000;
+        return port;
+    }
 
 
     public class SendAssist implements Runnable{
@@ -122,15 +121,16 @@ public class God {
         private ChatMode chatMode;
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
+        private GameManager gameManager;
 
 
-        public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) {
+        public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream,GameManager gameManager) {
             this.clients = clients;
             this.name = name;
-            this.objectInputStream = objectInputStream;
             this.objectOutputStream = objectOutputStream;
+            this.objectInputStream = objectInputStream;
             this.chatMode=ChatMode.ROOM;
-
+            this.gameManager=gameManager;
         }
 
         /**
@@ -164,7 +164,9 @@ public class God {
         public void setBroadCastMsg(String broadCastMsg) {
             this.broadCastMsg = broadCastMsg;
         }
+        public void sendToAll(String msg){
 
+        }
         /**
          * When an object implementing interface <code>Runnable</code> is used
          * to create a thread, starting the thread causes the object's
@@ -178,37 +180,23 @@ public class God {
          */
         @Override
         public void run() {
-            if (chatMode.equals(ChatMode.ROOM)) {
-
-
-                try {
-                    String tst;
-
-                    while (true) {
-                        tst =getBroadCastMsg();
-                        for (SendAssist h : clients) {
-                            if (tst.equals("") || tst.equals(null))
-                                continue;
-                            h.objectOutputStream.writeObject(name + " : " + tst);
+            try {
+                String tst;
+//                while(true) {
+                    tst = (String) objectInputStream.readObject();
+                    if (tst.equals("ready") && gameManager.startAllowance())
+                        for (SendAssist sa : clients) {
+                            sa.objectOutputStream.writeObject("game shall begin");
+                            System.out.println("its done");
                         }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    objectInputStream.close();
-                    objectOutputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+//                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-            else if(chatMode.equals(ChatMode.SOLO))
-            {
 
-            }
         }
-    }
 
+}
 }

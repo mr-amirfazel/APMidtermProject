@@ -37,10 +37,8 @@ public class ChatServer {
     }
     public class Handler implements Runnable{
         private Vector<Handler> clients = new Vector<>();
-
         private String name;
         private RoleTag roleTag;
-
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
 

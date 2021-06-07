@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GameClient {
+        private static final int MAXUSERS = 3;
         private  int port;
         private Socket socket;
         private String username;
         private ObjectOutputStream objectOutputStream;
         private ObjectInputStream objectInputStream;
         private ArrayList<String> names;
+        Thread t1;
 
     public GameClient() {
         names = new ArrayList<>();
@@ -31,20 +33,24 @@ public class GameClient {
         Scanner scanner = new Scanner(System.in);
         try(Socket socket = new Socket("127.0.0.1",port);) {
             System.out.println("connected to server\n waiting for  other players...");
-            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
              objectInputStream = new ObjectInputStream(socket.getInputStream());
              String name = playerAdd();
             setUsername(name);
-            objectOutputStream.writeObject(username);
-            System.out.println("Dear "+username+", you are officially a part of the game");
+            objectOutputStream.writeObject(name);
+            System.out.println("Dear "+name+", you are officially a part of the game");
             boolean isready =readySet();
-            if (isready)
-            objectOutputStream.writeObject("true");
+          //  if (isready)
+           // objectOutputStream.writeObject("true");
             System.out.println("you are set . waiting for other players to get ready...");
             GameClient gameClient = new GameClient();
             GameClient.ReadAssist readAssist = gameClient.new ReadAssist(objectInputStream);
-            Thread t1 = new Thread(readAssist);
-         //   t1.start();
+            t1 = new Thread(readAssist);
+            t1.start();
+            while(true){
+            objectOutputStream.writeObject("ready");
+            }
+
         }
 
         catch(ConnectException e){
@@ -53,9 +59,16 @@ public class GameClient {
         catch (IOException e) {
             e.printStackTrace();
         }
+//        catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
 //        catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
+//        catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+
 
     }
     public boolean readySet() throws IOException {
@@ -72,7 +85,16 @@ public class GameClient {
        }
         return iscor;
     }
-
+    public void read()
+    {
+        try {
+            System.out.println((String)objectInputStream.readObject());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public String playerAdd(){
         String name="";
@@ -125,17 +147,18 @@ public class GameClient {
          */
         @Override
         public void run() {
-
-
             try {
-                while(true){
+
                     System.out.println((String)objectInputStream.readObject());
-                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
+
+
     }
 }
+

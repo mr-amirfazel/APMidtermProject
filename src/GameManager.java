@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GameManager {
-    private static final int MAXUSERS = 10;
+    private static final int MAXUSERS = 3;
     private ArrayList<String> readySets;
     private ArrayList<Player> players;
     private ArrayList<Role> roles;
@@ -71,7 +71,7 @@ public class GameManager {
         readySets.add(ready);
     }
     public boolean startAllowance(){
-        boolean isAllowed = true;
+        boolean isAllowed = false;
         if (readySets.size()==MAXUSERS)
             isAllowed=true;
         return isAllowed;
