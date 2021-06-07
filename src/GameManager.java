@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GameManager {
-    private static final int MAXUSERS = 3;
+    private static final int MAXUSERS = 6;
     private ArrayList<String> readySets;
     private ArrayList<Player> players;
     private ArrayList<Role> roles;

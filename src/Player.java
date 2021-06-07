@@ -27,7 +27,7 @@ public class Player {
 
     @Override
     public String toString() {
-        return getUsername() +" : "+ getRole().getClass();
+        return getUsername() +" is: "+ getRole().toString();
     }
 
     public String getUsername() {

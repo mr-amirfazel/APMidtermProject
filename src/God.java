@@ -1,5 +1,8 @@
 import ChatRoom.ChatServer;
 import ChatRoom.RoleTag;
+import Roles.Doctor;
+import Roles.Mafia;
+import Roles.Mayor;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,7 +18,7 @@ import java.util.concurrent.Executors;
 public class God {
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    private static final int MAXUSERS=3;
+    private static final int MAXUSERS=6;
     private static Vector<SendAssist> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(MAXUSERS);
     private GameManager gameManager;
@@ -164,7 +167,7 @@ public class God {
 
         }
 
-        public void introductionNight(){
+        public void spreadRoles(){
             gameManager.assignRoles();
             int i=0;
             for (Player p:gameManager.getPlayers()){
@@ -186,6 +189,41 @@ public class God {
                 clients.get(clientIndex).objectOutputStream.writeObject(message);
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+
+        /**
+         * this method makes the mafia know each other
+         * and majes the mayor to know the doctor
+         */
+        public void introductionNight(){
+            mafiaIntroduce();
+            docIntroduce();
+        }
+        public void mafiaIntroduce()
+        {
+            ArrayList<Integer> mafias = new ArrayList<>();
+            for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
+                if(gameManager.getPlayers().get(i).getRole() instanceof Mafia)
+                    mafias.add(i);
+            }
+
+            for (int i = 0; i < mafias.size() ; i++) {
+                for (int j = 0; j < mafias.size() ; j++) {
+                    if(i!=j)
+                        sendToClient(gameManager.getPlayers().get(j).toString(),i);
+                }
+            }
+        }
+        public void docIntroduce(){
+            for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
+                if(gameManager.getPlayers().get(i).getRole() instanceof Mayor)
+                {
+                    for (int j = 0; j <gameManager.getPlayers().size() ; j++) {
+                        if(gameManager.getPlayers().get(j).getRole() instanceof Doctor)
+                                sendToClient(gameManager.getPlayers().get(j).toString(),i);
+                    }
+                }
             }
         }
 
@@ -212,6 +250,7 @@ public class God {
                     if(tst.equalsIgnoreCase("ready"))
                         sendToAll("game shall begin");
                     System.out.println("done!!");
+                    spreadRoles();
                     introductionNight();
 
 //                }

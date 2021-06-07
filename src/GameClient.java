@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GameClient {
-        private static final int MAXUSERS = 3;
+        private static final int MAXUSERS = 6;
         private  int port;
         private Socket socket;
         private String username;
