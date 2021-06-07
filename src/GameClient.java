@@ -150,9 +150,9 @@ public class GameClient {
         @Override
         public void run() {
             try {
-
-                    System.out.println((String)objectInputStream.readObject());
-
+                while(true) {
+                    System.out.println((String) objectInputStream.readObject());
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {

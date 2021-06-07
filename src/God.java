@@ -161,13 +161,14 @@ public class God {
                         e.printStackTrace();
                     }
                 }
+
         }
 
         public void introductionNight(){
             gameManager.assignRoles();
             int i=0;
             for (Player p:gameManager.getPlayers()){
-                sendToClient("you are : "+p.getRole().getClass(),i);
+                sendToClient("you are : "+p.getRole().toString(),i);
                 i++;
             }
 
@@ -204,16 +205,16 @@ public class God {
         public void run() {
             try {
                 String tst;
-                while(true) {
 
+                if(gameManager.startAllowance()) {
+//                    while(true) {
                     tst = (String) objectInputStream.readObject();
-                    if (tst.equals("ready") && gameManager.startAllowance()) {
+                    if(tst.equalsIgnoreCase("ready"))
                         sendToAll("game shall begin");
-                        introductionNight();
-                    }
+                    System.out.println("done!!");
+                    introductionNight();
 
-
-
+//                }
                 }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
