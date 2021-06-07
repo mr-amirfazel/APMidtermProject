@@ -118,7 +118,6 @@ public class God {
         private Vector<SendAssist> clients;
         private String name;
         private String broadCastMsg;
-        private ChatMode chatMode;
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
         private GameManager gameManager;
@@ -129,25 +128,10 @@ public class God {
             this.name = name;
             this.objectOutputStream = objectOutputStream;
             this.objectInputStream = objectInputStream;
-            this.chatMode=ChatMode.ROOM;
             this.gameManager=gameManager;
         }
 
-        /**
-         * getter for the state of Chatmode
-         * @return
-         */
-        public ChatMode getChatMode() {
-            return chatMode;
-        }
 
-        /**
-         * setter for the state of chatmode
-         * @param chatMode
-         */
-        public void setChatMode(ChatMode chatMode) {
-            this.chatMode = chatMode;
-        }
 
         /**
          * getter for the string message to be broadcasted
@@ -164,9 +148,47 @@ public class God {
         public void setBroadCastMsg(String broadCastMsg) {
             this.broadCastMsg = broadCastMsg;
         }
+
+        /**
+         * this method sends a string message to every connected clients
+         * @param msg
+         */
         public void sendToAll(String msg){
+                for (SendAssist sa:clients) {
+                    try {
+                        sa.objectOutputStream.writeObject(msg);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+        }
+
+        public void introductionNight(){
+            gameManager.assignRoles();
+            int i=0;
+            for (Player p:gameManager.getPlayers()){
+                sendToClient("you are : "+p.getRole().getClass(),i);
+                i++;
+            }
 
         }
+
+        /**
+         * this method sends a String message to a specific client by its index in the list of clients ordering according to
+         * the connection
+         * @param message
+         * @param clientIndex
+         */
+        public void sendToClient(String message,int clientIndex)
+        {
+            try {
+                clients.get(clientIndex).objectOutputStream.writeObject(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         /**
          * When an object implementing interface <code>Runnable</code> is used
          * to create a thread, starting the thread causes the object's
@@ -182,17 +204,18 @@ public class God {
         public void run() {
             try {
                 String tst;
-//                while(true) {
+                while(true) {
+
                     tst = (String) objectInputStream.readObject();
-                    if (tst.equals("ready") && gameManager.startAllowance())
-                        for (SendAssist sa : clients) {
-                            sa.objectOutputStream.writeObject("game shall begin");
-                            System.out.println("its done");
-                        }
-//                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+                    if (tst.equals("ready") && gameManager.startAllowance()) {
+                        sendToAll("game shall begin");
+                        introductionNight();
+                    }
+
+
+
+                }
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 

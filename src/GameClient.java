@@ -49,6 +49,8 @@ public class GameClient {
             t1.start();
             while(true){
             objectOutputStream.writeObject("ready");
+
+           // objectOutputStream.writeObject("introduction");
             }
 
         }

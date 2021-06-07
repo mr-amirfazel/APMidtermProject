@@ -52,7 +52,7 @@ public class GameManager {
      * shuffles the roles list
      * and then give each player a role
      */
-    public  void AssignRoles(){
+    public  void assignRoles(){
         initialRoles();
         shuffleRoles();
         int i =0;
