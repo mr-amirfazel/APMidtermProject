@@ -7,6 +7,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GameClient {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
         private static final int MAXUSERS = 6;
         private  int port;
         private Socket socket;
@@ -45,10 +54,16 @@ public class GameClient {
             System.out.println("you are set . waiting for other players to get ready...");
             GameClient gameClient = new GameClient();
             GameClient.ReadAssist readAssist = gameClient.new ReadAssist(objectInputStream);
+            String tst ;
             t1 = new Thread(readAssist);
             t1.start();
-            while(true){
             objectOutputStream.writeObject("ready");
+            System.out.println(ANSI_RED+"Entered chatroom__type something"+ANSI_RESET);
+            objectOutputStream.writeObject("chat");
+            while(true){
+
+                tst = scanner.nextLine();
+                objectOutputStream.writeObject(tst);
 
            // objectOutputStream.writeObject("introduction");
             }

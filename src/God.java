@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 public class God {
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    private static final int MAXUSERS=6;
+    private static final int MAXUSERS=3;
     private static Vector<SendAssist> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(MAXUSERS);
     private GameManager gameManager;
@@ -248,11 +248,22 @@ public class God {
                 if(gameManager.startAllowance()) {
 //                    while(true) {
                     tst = (String) objectInputStream.readObject();
-                    if(tst.equalsIgnoreCase("ready"))
+                    if(tst.equalsIgnoreCase("ready")) {
                         sendToAll("game shall begin");
+                        spreadRoles();
+                        introductionNight();
+                    }
                     System.out.println("done!!");
-                    spreadRoles();
-                    introductionNight();
+
+
+                    tst=(String)objectInputStream.readObject();
+                        while(true) {
+                            if (tst.equalsIgnoreCase("chat"))
+                            {
+                            String msg =(String) objectInputStream.readObject();
+                            sendToAll(name+" : "+msg);
+                        }
+                    }
 
 //                }
                 }
