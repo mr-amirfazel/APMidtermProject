@@ -13,6 +13,8 @@ public class GameManager {
         readySets = new ArrayList<>();
         players = new ArrayList<>();
         roles = new ArrayList<>();
+        initialRoles();
+        shuffleRoles();
     }
 
     /**
@@ -53,8 +55,7 @@ public class GameManager {
      * and then give each player a role
      */
     public  void assignRoles(){
-        initialRoles();
-        shuffleRoles();
+
         int i =0;
         for (Player p:players){
             p.setRole(roles.get(i));

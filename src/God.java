@@ -210,8 +210,9 @@ public class God {
 
             for (int i = 0; i < mafias.size() ; i++) {
                 for (int j = 0; j < mafias.size() ; j++) {
-                    if(i!=j)
-                        sendToClient(gameManager.getPlayers().get(j).toString(),i);
+                    if(i==j)
+                        continue;
+                    sendToClient(gameManager.getPlayers().get(j).toString(),mafias.get(i));
                 }
             }
         }
