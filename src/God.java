@@ -191,6 +191,7 @@ public class God {
             int i = 0;
             for (Player p : gameManager.getPlayers()) {
                 sendToClient("you are : " + p.getRole().toString(), i);
+                System.out.println(p.getUsername() +" is: "+ p.getRole().toString());
                 i++;
             }
 
