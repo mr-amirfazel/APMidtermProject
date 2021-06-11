@@ -7,15 +7,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GameClient {
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
         private static final int MAXUSERS = 6;
         private  int port;
         private Socket socket;
@@ -49,23 +40,21 @@ public class GameClient {
             objectOutputStream.writeObject(name);
             System.out.println("Dear "+name+", you are officially a part of the game");
             boolean isready =readySet();
-          //  if (isready)
-           // objectOutputStream.writeObject("true");
-            System.out.println("you are set . waiting for other players to get ready...");
+//            if (isready)
+//            objectOutputStream.writeObject("true");
+            System.out.println("you are set .you can chat to other players Untill the room is full.");
             GameClient gameClient = new GameClient();
             GameClient.ReadAssist readAssist = gameClient.new ReadAssist(objectInputStream);
             String tst ;
             t1 = new Thread(readAssist);
+//            objectOutputStream.writeObject("ready");
+//            objectOutputStream.writeObject("chat");
             t1.start();
-            objectOutputStream.writeObject("ready");
-            System.out.println(ANSI_RED+"Entered chatroom__type something"+ANSI_RESET);
-            objectOutputStream.writeObject("chat");
             while(true){
-
                 tst = scanner.nextLine();
                 objectOutputStream.writeObject(tst);
-
-           // objectOutputStream.writeObject("introduction");
+//
+//           // objectOutputStream.writeObject("introduction");
             }
 
         }
@@ -76,6 +65,9 @@ public class GameClient {
         catch (IOException e) {
             e.printStackTrace();
         }
+//        catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 //        catch (ClassNotFoundException e) {
 //            e.printStackTrace();
 //        }
@@ -164,18 +156,26 @@ public class GameClient {
          */
         @Override
         public void run() {
+            System.out.println("EXIT : to leave chat \n HISTORY: review chats");
+            String tst;
             try {
                 while(true) {
-                    System.out.println((String) objectInputStream.readObject());
+                   tst =(String)objectInputStream.readObject();
+                   if(tst.equalsIgnoreCase("chatready"))
+                   continue;
+                   else
+                   {
+                       System.out.println(tst);
+                   }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+
         }
-
-
+        
     }
 }
 

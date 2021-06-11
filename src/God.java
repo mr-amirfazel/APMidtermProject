@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 public class God {
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    private static final int MAXUSERS=3;
+    private static final int MAXUSERS = 3;
     private static Vector<SendAssist> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(MAXUSERS);
     private GameManager gameManager;
@@ -29,42 +29,46 @@ public class God {
         names = new ArrayList<>();
     }
 
-    public void godRun(God god){
-        God.SendAssist sendAssist= null;
+    public void godRun(God god) {
+        God.SendAssist sendAssist = null;
         int port = randomPort();
-        try(ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("God has just started a game running on "+port+"\n waiting for players to join...");
-            int userCounter=0;
-            while(true) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("God has just started a game running on " + port + "\n waiting for players to join...");
+            int userCounter = 0;
+            while (true) {
 
-                    Socket socket = serverSocket.accept();
-                    objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                    objectInputStream = new ObjectInputStream(socket.getInputStream());
-                    String name = playerAdd();
-                    names.add(name);
-                    gameManager.addPlayer(new Player(name));
-                    System.out.println(name + " is connected from port: " + socket.getPort());
-                    String c = (String) objectInputStream.readObject();
-                    gameManager.addReadyState(c);
-                    sendAssist = god.new SendAssist(clients, name, objectInputStream, objectOutputStream,gameManager);
-                    clients.add(sendAssist);
-                    pool.execute(sendAssist);
-                    userCounter++;
+                Socket socket = serverSocket.accept();
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
+                String name;
+                name =playerAdd();
+                names.add(name);
+                gameManager.addPlayer(new Player(name));
+                System.out.println(name + " is connected from port: " + socket.getPort());
+                String c = (String) objectInputStream.readObject();
+                gameManager.addReadyState(c);
+                sendAssist = god.new SendAssist(clients, name, objectInputStream, objectOutputStream, gameManager);
+                clients.add(sendAssist);
+                pool.execute(sendAssist);
+                userCounter++;
 
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {
         God god = new God();
         god.godRun(god);
     }
+
     public void readyCheck() throws IOException, ClassNotFoundException {
-        do{
+        do {
             try {
                 objectOutputStream.writeObject("are you ready ? yes/no");
             } catch (IOException e) {
@@ -72,11 +76,12 @@ public class God {
             }
             //  gameManager.addReadyState((Character) objectInputStream.readObject());
         }
-        while((Character)objectInputStream.readObject()!='y');
+        while ((Character) objectInputStream.readObject() != 'y');
     }
-    public String playerAdd(){
 
-        String name="";
+    public String playerAdd() {
+
+        String name = "";
         do {
             try {
                 objectOutputStream.writeObject("send");
@@ -84,40 +89,50 @@ public class God {
                 e.printStackTrace();
             }
             try {
-                name =(String) objectInputStream.readObject();
+                name = (String) objectInputStream.readObject();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        }while(!isValidName(name));
+        } while (!isValidName(name));
         try {
             objectOutputStream.writeObject("end");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-       return name;
+        return name;
     }
-    public  boolean isValidName(String name)
-    {
+
+    public boolean isValidName(String name) {
         boolean isVal = true;
-        for (String Name:names)
-        {
-            if (Name.equals(name)){
-                isVal=false;
-            break;}
+        for (String Name : names) {
+            if (Name.equals(name)) {
+                isVal = false;
+                break;
+            }
         }
         return isVal;
     }
-    public int randomPort(){
+
+    public int randomPort() {
         Random rand = new Random();
-        int port = rand.nextInt(7000)+3000;
+        int port = rand.nextInt(7000) + 3000;
         return port;
     }
 
 
-    public class SendAssist implements Runnable{
+    public class SendAssist implements Runnable {
+        public static final String ANSI_RESET = "\u001B[0m";
+        public static final String ANSI_BLACK = "\u001B[30m";
+        public static final String ANSI_RED = "\u001B[31m";
+        public static final String ANSI_GREEN = "\u001B[32m";
+        public static final String ANSI_YELLOW = "\u001B[33m";
+        public static final String ANSI_BLUE = "\u001B[34m";
+        public static final String ANSI_PURPLE = "\u001B[35m";
+        public static final String ANSI_CYAN = "\u001B[36m";
+        public static final String ANSI_WHITE = "\u001B[37m";
         private Vector<SendAssist> clients;
         private String name;
         private String broadCastMsg;
@@ -126,18 +141,18 @@ public class God {
         private GameManager gameManager;
 
 
-        public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream,GameManager gameManager) {
+        public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, GameManager gameManager) {
             this.clients = clients;
             this.name = name;
             this.objectOutputStream = objectOutputStream;
             this.objectInputStream = objectInputStream;
-            this.gameManager=gameManager;
+            this.gameManager = gameManager;
         }
-
 
 
         /**
          * getter for the string message to be broadcasted
+         *
          * @return
          */
         public String getBroadCastMsg() {
@@ -146,6 +161,7 @@ public class God {
 
         /**
          * setter for the message to be broadcasted
+         *
          * @param broadCastMsg
          */
         public void setBroadCastMsg(String broadCastMsg) {
@@ -154,24 +170,27 @@ public class God {
 
         /**
          * this method sends a string message to every connected clients
+         *
          * @param msg
          */
-        public void sendToAll(String msg){
-                for (SendAssist sa:clients) {
-                    try {
-                        sa.objectOutputStream.writeObject(msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        public void sendToAll(String msg) {
+            for (SendAssist sa : clients) {
+                try {
+                    if (msg.equals("") || msg.equals(null))
+                        continue;
+                    sa.objectOutputStream.writeObject(msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+            }
 
         }
 
-        public void spreadRoles(){
+        public void spreadRoles() {
             gameManager.assignRoles();
-            int i=0;
-            for (Player p:gameManager.getPlayers()){
-                sendToClient("you are : "+p.getRole().toString(),i);
+            int i = 0;
+            for (Player p : gameManager.getPlayers()) {
+                sendToClient("you are : " + p.getRole().toString(), i);
                 i++;
             }
 
@@ -180,11 +199,11 @@ public class God {
         /**
          * this method sends a String message to a specific client by its index in the list of clients ordering according to
          * the connection
+         *
          * @param message
          * @param clientIndex
          */
-        public void sendToClient(String message,int clientIndex)
-        {
+        public void sendToClient(String message, int clientIndex) {
             try {
                 clients.get(clientIndex).objectOutputStream.writeObject(message);
             } catch (IOException e) {
@@ -196,33 +215,33 @@ public class God {
          * this method makes the mafia know each other
          * and majes the mayor to know the doctor
          */
-        public void introductionNight(){
+        public void introductionNight() {
             mafiaIntroduce();
             docIntroduce();
         }
-        public void mafiaIntroduce()
-        {
+
+        public void mafiaIntroduce() {
             ArrayList<Integer> mafias = new ArrayList<>();
-            for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
-                if(gameManager.getPlayers().get(i).getRole() instanceof Mafia)
+            for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                if (gameManager.getPlayers().get(i).getRole() instanceof Mafia)
                     mafias.add(i);
             }
 
-            for (int i = 0; i < mafias.size() ; i++) {
-                for (int j = 0; j < mafias.size() ; j++) {
-                    if(i==j)
+            for (int i = 0; i < mafias.size(); i++) {
+                for (int j = 0; j < mafias.size(); j++) {
+                    if (i == j)
                         continue;
-                    sendToClient(gameManager.getPlayers().get(j).toString(),mafias.get(i));
+                    sendToClient(gameManager.getPlayers().get(j).toString(), mafias.get(i));
                 }
             }
         }
-        public void docIntroduce(){
-            for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
-                if(gameManager.getPlayers().get(i).getRole() instanceof Mayor)
-                {
-                    for (int j = 0; j <gameManager.getPlayers().size() ; j++) {
-                        if(gameManager.getPlayers().get(j).getRole() instanceof Doctor)
-                                sendToClient(gameManager.getPlayers().get(j).toString(),i);
+
+        public void docIntroduce() {
+            for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                if (gameManager.getPlayers().get(i).getRole() instanceof Mayor) {
+                    for (int j = 0; j < gameManager.getPlayers().size(); j++) {
+                        if (gameManager.getPlayers().get(j).getRole() instanceof Doctor)
+                            sendToClient(gameManager.getPlayers().get(j).toString(), i);
                     }
                 }
             }
@@ -243,35 +262,42 @@ public class God {
         @Override
         public void run() {
             try {
+                if (gameManager.startAllowance()) {
+                    sendToAll("game shall begin");
+                    spreadRoles();
+                    introductionNight();
+                    sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
+                }
                 String tst;
-
-                if(gameManager.startAllowance()) {
-//                    while(true) {
-                    tst = (String) objectInputStream.readObject();
-                    if(tst.equalsIgnoreCase("ready")) {
-                        sendToAll("game shall begin");
-                        spreadRoles();
-                        introductionNight();
-                    }
-                    System.out.println("done!!");
+                while (true) {
+                    tst = (String)objectInputStream.readObject();
+                    sendToAll(name+" : "+tst);
 
 
-                    tst=(String)objectInputStream.readObject();
-                        while(true) {
-                            if (tst.equalsIgnoreCase("chat"))
-                            {
-                            String msg =(String) objectInputStream.readObject();
-                            sendToAll(name+" : "+msg);
-                        }
-                    }
+//                        tst=(String)objectInputStream.readObject();
+//                        String msg;
+//                        if (tst.equalsIgnoreCase("chat")) {
+//
+//                            while (true) {
+//                                objectOutputStream.writeObject("CHATREADY");
+//                                {
+//                                    msg = (String) objectInputStream.readObject();
+//                                    System.out.println(name + " : " + msg);
+//                                    sendToAll(name + " : " + msg);
+//                                }
+//                            }
+//                        }
+//                    System.out.println("done!!");
 
 //                }
-                }
+                    }
+//                }
+
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
         }
 
-}
+    }
 }
