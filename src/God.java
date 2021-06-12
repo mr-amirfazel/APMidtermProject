@@ -139,6 +139,7 @@ public class God {
         private ObjectOutputStream objectOutputStream = null;
         private ObjectInputStream objectInputStream = null;
         private GameManager gameManager;
+        private Phaze gamePhaze;
 
 
         public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, GameManager gameManager) {
@@ -147,25 +148,23 @@ public class God {
             this.objectOutputStream = objectOutputStream;
             this.objectInputStream = objectInputStream;
             this.gameManager = gameManager;
+            this.gamePhaze = Phaze.DAY;
         }
 
-
         /**
-         * getter for the string message to be broadcasted
-         *
+         * getter for the current Phaze of the game
          * @return
          */
-        public String getBroadCastMsg() {
-            return broadCastMsg;
+        public Phaze getGamePhaze() {
+            return gamePhaze;
         }
 
         /**
-         * setter for the message to be broadcasted
-         *
-         * @param broadCastMsg
+         * setter for the Phaze of the Game
+         * @param gamePhaze
          */
-        public void setBroadCastMsg(String broadCastMsg) {
-            this.broadCastMsg = broadCastMsg;
+        public void setGamePhaze(Phaze gamePhaze) {
+            this.gamePhaze = gamePhaze;
         }
 
         /**
@@ -186,6 +185,9 @@ public class God {
 
         }
 
+        /**
+         * this method spreads roles among the players in game
+         */
         public void spreadRoles() {
             gameManager.assignRoles();
             int i = 0;
@@ -221,7 +223,10 @@ public class God {
             docIntroduce();
         }
 
-        public void mafiaIntroduce() {
+        /**
+         * introduces the mafia team to other mafias
+         */
+        private void mafiaIntroduce() {
             ArrayList<Integer> mafias = new ArrayList<>();
             for (int i = 0; i < gameManager.getPlayers().size(); i++) {
                 if (gameManager.getPlayers().get(i).getRole() instanceof Mafia)
@@ -237,7 +242,10 @@ public class God {
             }
         }
 
-        public void docIntroduce() {
+        /**
+         * introduces the doctor of game to the Mayor of game
+         */
+        private void docIntroduce() {
             for (int i = 0; i < gameManager.getPlayers().size(); i++) {
                 if (gameManager.getPlayers().get(i).getRole() instanceof Mayor) {
                     for (int j = 0; j < gameManager.getPlayers().size(); j++) {
@@ -269,35 +277,86 @@ public class God {
                     introductionNight();
                     sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
                 }
-                String tst;
-                while (true) {
-                    tst = (String)objectInputStream.readObject();
-                    sendToAll(name+" : "+tst);
 
-
-//                        tst=(String)objectInputStream.readObject();
-//                        String msg;
-//                        if (tst.equalsIgnoreCase("chat")) {
 //
-//                            while (true) {
-//                                objectOutputStream.writeObject("CHATREADY");
-//                                {
-//                                    msg = (String) objectInputStream.readObject();
-//                                    System.out.println(name + " : " + msg);
-//                                    sendToAll(name + " : " + msg);
-//                                }
-//                            }
-//                        }
-//                    System.out.println("done!!");
-
-//                }
-                    }
-//                }
-
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
+
+            while (!gameManager.endGame()) {
+                    switch (gamePhaze){
+                        case DAY:day();
+                        switchPhaze();
+                        break;
+                        case NIGHT:night();
+                        switchPhaze();
+                        break;
+                        case VOTING:voting();
+                        switchPhaze();
+                        break;
+                    }
+
+
+
+
+            }
+//                catch (IOException | ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+
+        }
+
+        /**
+         * this method is for managing the game while its on Phaze of DAY
+         * aka the CHATROOM of the game
+         */
+        public void day(){
+            String tst="";
+            long start = System.currentTimeMillis();
+            long finish = start + 5*60*1000;
+        while (System.currentTimeMillis()<finish) {
+            try {
+                tst = (String) objectInputStream.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            sendToAll(name+" : "+tst);
+        }
+        }
+
+        /**
+         * this method is for managing the game while its on Phaze NIGHT
+         * what happens in this method is what every players do in their night move
+         */
+        public void night(){}
+
+        /**
+         * this method will start working right after DAY Phaze and the CHATROOM time ends
+         * and is a voting system for players to kick out any other player
+         *
+         * and if we end up to a tie it wont do anything
+         */
+        public void voting(){}
+
+        /**
+         * this method makes the phazes to change their states while the game is going on
+         * ------if we are in day and the method is done , we move to voting Phaze----
+         * ------if we are in voting and the method is done , we move to Night Phaze-----
+         * ------if we are in night and the actions are done, we move to Day Phaze-------
+         */
+        private void switchPhaze(){
+            switch (getGamePhaze())
+            {
+                case DAY:setGamePhaze(Phaze.VOTING);
+                break;
+                case VOTING:setGamePhaze(Phaze.NIGHT);
+                break;
+                case NIGHT:setGamePhaze(Phaze.DAY);
+                break;
+            }
         }
 
     }

@@ -85,4 +85,50 @@ public class GameManager {
     public ArrayList<Player> getPlayers() {
         return players;
     }
+
+    /**
+     * this method determines when the game is over
+     * @return
+     */
+    public boolean endGame(){
+        boolean endgame = false;
+            if ((mafiaCounter() ==citizenCounter())||(mafiaCounter()==0))
+                endgame = true;
+
+        return endgame;
+    }
+
+    /**
+     * this inner mwthod counts the mafias left in game
+     * @return
+     */
+    private int mafiaCounter(){
+        int i =0;
+        for (Player p:players)
+            if ((p.getRole() instanceof Mafia)&&(p.isAlive()))
+                i++;
+    return i;
+    }
+
+    /**
+     * this inner method counts the citizens left
+     * @return
+     */
+    private int citizenCounter(){
+        int i =0;
+        for (Player p:players)
+            if (!(p.getRole() instanceof Mafia) && p.isAlive())
+                i++;
+        return i;
+    }
+    public String gameOverStatement(){
+        String txt="";
+        if(mafiaCounter()==citizenCounter())
+            txt= "Mafia Won The Game";
+        else if (mafiaCounter()==0)
+            txt = "Citizens Won The Game";
+
+        return txt;
+    }
+
 }
