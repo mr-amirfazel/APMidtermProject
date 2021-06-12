@@ -141,7 +141,15 @@ public class God {
         private GameManager gameManager;
         private Phaze gamePhaze;
 
-
+        /**
+         * constructor for the SendAssist Class
+         * where every task related to server is managed in
+         * @param clients
+         * @param name
+         * @param objectInputStream
+         * @param objectOutputStream
+         * @param gameManager
+         */
         public SendAssist(Vector<SendAssist> clients, String name, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, GameManager gameManager) {
             this.clients = clients;
             this.name = name;
@@ -256,7 +264,6 @@ public class God {
             }
         }
 
-
         /**
          * When an object implementing interface <code>Runnable</code> is used
          * to create a thread, starting the thread causes the object's
@@ -271,19 +278,18 @@ public class God {
         @Override
         public void run() {
             try {
+                /**
+                 * literally the game starts from here cause the gameAllowance method gives us the permission to the primary tasks
+                 * such as spreading roles and doing th introductionNight
+                 */
                 if (gameManager.startAllowance()) {
                     sendToAll("game shall begin");
                     spreadRoles();
                     introductionNight();
-                    sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
                 }
-
-//
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
             while (!gameManager.endGame()) {
                     switch (gamePhaze){
                         case DAY:day();
@@ -296,15 +302,7 @@ public class God {
                         switchPhaze();
                         break;
                     }
-
-
-
-
             }
-//                catch (IOException | ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-
         }
 
         /**
@@ -312,6 +310,7 @@ public class God {
          * aka the CHATROOM of the game
          */
         public void day(){
+            sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
             String tst="";
             long start = System.currentTimeMillis();
             long finish = start + 5*60*1000;
@@ -339,7 +338,20 @@ public class God {
          *
          * and if we end up to a tie it wont do anything
          */
-        public void voting(){}
+        public void voting(){
+            sendToAll(ANSI_BLUE+"Entered Voting Area  ------- enter the name of who U think is Mafia\n Note not to vote for yourself or a wrong name"+ANSI_RESET);
+            for (int i = 0; i <clients.size() ; i++) {
+                sendToClient(gameManager.remainingPlayers(i),i);
+            }
+            String tst="";
+            try {
+                tst = (String)objectInputStream.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
         /**
          * this method makes the phazes to change their states while the game is going on

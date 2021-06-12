@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GameManager {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
     private static final int MAXUSERS = 3;
     private ArrayList<String> readySets;
     private ArrayList<Player> players;
@@ -129,6 +131,22 @@ public class GameManager {
             txt = "Citizens Won The Game";
 
         return txt;
+    }
+    public String remainingPlayers(int index){
+        Player player = players.get(index);
+        int i =1;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Player p:players)
+            if (p.isAlive())
+            {
+                if (p.equals(player))
+                    stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append(ANSI_RESET);
+                else
+                stringBuilder.append(i).append(")").append(p.getUsername());
+
+                i++;
+            }
+        return stringBuilder.toString();
     }
 
 }
