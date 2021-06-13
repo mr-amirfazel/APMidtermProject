@@ -2,6 +2,8 @@ import Roles.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameManager {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -11,6 +13,7 @@ public class GameManager {
     private ArrayList<Player> players;
     private ArrayList<Role> roles;
     private boolean gameShelf;
+    private HashMap<Player,String> votes;
 
     public GameManager() {
         readySets = new ArrayList<>();
@@ -158,13 +161,65 @@ public class GameManager {
             if (p.isAlive())
             {
                 if (p.equals(player))
-                    stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append(ANSI_RESET);
+                    stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append('n').append(ANSI_RESET);
                 else
                 stringBuilder.append(i).append(")").append(p.getUsername()).append('\n');
 
                 i++;
             }
         return stringBuilder.toString();
+    }
+
+    /**
+     * this method is supposed to be the main method to do the tasks while game is in phaze VOTING
+     */
+    public void votingSystem(){
+        ArrayList<Player> alivePlayers = getAlivePlayers();
+        ArrayList<Vote> votes = new ArrayList<>();
+        for (Player p: alivePlayers)
+        {
+            votes.add(new Vote(p.getUsername()));
+        }
+        voteCount(votes);
+
+
+    }
+    private void voteCount(ArrayList<Vote> voteset){
+        for (Vote v:voteset)
+        {
+            for(Map.Entry<Player,String> entry :votes.entrySet())
+            {
+                if (entry.getValue().equals(v.getName()))
+                    v.addCount();
+            }
+        }
+    }
+
+    /**
+     * getter for Hashmap Votes
+     * @return
+     */
+    public HashMap<Player, String> getVotes() {
+        return votes;
+    }
+
+    /**
+     * this method makes a new hashmap once its called
+     * we didnt initialize the hashmap in constructor
+     * because whenever we need a votingList it should be empty to add some votes
+     */
+    public void voteInit(){
+        votes = new HashMap<>();
+    }
+    private ArrayList<Player> getAlivePlayers(){
+        ArrayList<Player> aliveMembers = new ArrayList<>();
+        for (Player p:players)
+            if(p.isAlive())
+                aliveMembers.add(p);
+
+
+         return aliveMembers;
+
     }
 
 }

@@ -322,6 +322,7 @@ public class God {
          */
         public void day(){
             System.out.println("PHAZE : DAY");
+            if (gameManager.isGameShelf())
             sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
             String tst="";
             long start = System.currentTimeMillis();
@@ -354,6 +355,8 @@ public class God {
          * and if we end up to a tie it wont do anything
          */
         public void voting(){
+            System.out.println("PHAZE : VOTING");
+            if (gameManager.isGameShelf())
             sendToAll(ANSI_BLUE+"Entered Voting Area  ------- enter the name of who U think is Mafia\n Note not to vote for yourself or a wrong name"+ANSI_RESET);
             for (int i = 0; i <clients.size() ; i++) {
                 sendToClient(gameManager.remainingPlayers(i),i);
@@ -361,6 +364,14 @@ public class God {
             String tst="";
             try {
                 tst = (String)objectInputStream.readObject();
+                gameManager.voteInit();
+                if(tst.equals(name))
+                    gameManager.getVotes().put(playerByName(name),"INVALID");
+                else if (nameExist(tst))
+                    gameManager.getVotes().put(playerByName(name),tst);
+                else
+                    gameManager.getVotes().put(playerByName(name),"INVALID");
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
@@ -384,6 +395,25 @@ public class God {
                 case NIGHT:setGamePhaze(Phaze.DAY);
                 break;
             }
+        }
+
+        private Player playerByName(String name){
+            Player player=null;
+            for(Player p:gameManager.getPlayers())
+                if (p.getUsername().equals(name))
+                    player=p;
+
+                return player;
+        }
+        private boolean nameExist(String name){
+            boolean exists = false;
+
+            for(Player p: gameManager.getPlayers())
+                if(p.getUsername().equals(name)) {
+                    exists = true;
+                    break;
+                }
+            return exists;
         }
 
     }
