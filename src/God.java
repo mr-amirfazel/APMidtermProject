@@ -245,7 +245,8 @@ public class God {
                 for (int j = 0; j < mafias.size(); j++) {
                     if (i == j)
                         continue;
-                    sendToClient(gameManager.getPlayers().get(j).toString(), mafias.get(i));
+                    else
+                    sendToClient(gameManager.getPlayers().get(mafias.get(j)).toString(), mafias.get(i));
                 }
             }
         }
@@ -286,23 +287,33 @@ public class God {
                     sendToAll("game shall begin");
                     spreadRoles();
                     introductionNight();
+                    gameManager.setGameShelf(true);
+                    }
+              //  while (!gameManager.endGame())
+                while(true){
+
+                        switch (gamePhaze) {
+                            case DAY:
+                                day();
+                                break;
+                            case NIGHT:
+                                night();
+                                switchPhaze();
+                                break;
+                            case VOTING:
+                                voting();
+                                switchPhaze();
+                                break;
+                        }
+
+
                 }
+              //  sendToAll(gameManager.gameOverStatement());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            while (!gameManager.endGame()) {
-                    switch (gamePhaze){
-                        case DAY:day();
-                        switchPhaze();
-                        break;
-                        case NIGHT:night();
-                        switchPhaze();
-                        break;
-                        case VOTING:voting();
-                        switchPhaze();
-                        break;
-                    }
-            }
+
+
         }
 
         /**
@@ -310,20 +321,24 @@ public class God {
          * aka the CHATROOM of the game
          */
         public void day(){
+            System.out.println("PHAZE : DAY");
             sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
             String tst="";
             long start = System.currentTimeMillis();
             long finish = start + 5*60*1000;
-        while (System.currentTimeMillis()<finish) {
+
             try {
-                tst = (String) objectInputStream.readObject();
+                while (System.currentTimeMillis()<finish){
+                    tst = (String) objectInputStream.readObject();
+                    sendToAll(name+" : "+tst);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            sendToAll(name+" : "+tst);
-        }
+
+            switchPhaze();
         }
 
         /**

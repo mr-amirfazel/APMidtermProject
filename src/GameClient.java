@@ -161,12 +161,8 @@ public class GameClient {
             try {
                 while(true) {
                    tst =(String)objectInputStream.readObject();
-                   if(tst.equalsIgnoreCase("chatready"))
-                   continue;
-                   else
-                   {
+
                        System.out.println(tst);
-                   }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

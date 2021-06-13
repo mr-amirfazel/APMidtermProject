@@ -10,6 +10,7 @@ public class GameManager {
     private ArrayList<String> readySets;
     private ArrayList<Player> players;
     private ArrayList<Role> roles;
+    private boolean gameShelf;
 
     public GameManager() {
         readySets = new ArrayList<>();
@@ -17,6 +18,23 @@ public class GameManager {
         roles = new ArrayList<>();
         initialRoles();
         shuffleRoles();
+        this.gameShelf = false;
+    }
+
+    /**
+     * getter for the gameShelf
+     * @return
+     */
+    public boolean isGameShelf() {
+        return gameShelf;
+    }
+
+    /**
+     *setter for the gameShelf
+     * @param gameShelf
+     */
+    public void setGameShelf(boolean gameShelf) {
+        this.gameShelf = gameShelf;
     }
 
     /**
@@ -142,7 +160,7 @@ public class GameManager {
                 if (p.equals(player))
                     stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append(ANSI_RESET);
                 else
-                stringBuilder.append(i).append(")").append(p.getUsername());
+                stringBuilder.append(i).append(")").append(p.getUsername()).append('\n');
 
                 i++;
             }
