@@ -12,6 +12,7 @@ public class GameManager {
     private ArrayList<String> readySets;
     private ArrayList<Player> players;
     private ArrayList<Role> roles;
+    private ArrayList<Player> outPlayers;
     private boolean gameShelf;
     private HashMap<Player,String> votes;
 
@@ -19,6 +20,7 @@ public class GameManager {
         readySets = new ArrayList<>();
         players = new ArrayList<>();
         roles = new ArrayList<>();
+        outPlayers = new ArrayList<>();
         initialRoles();
         shuffleRoles();
         this.gameShelf = false;
@@ -122,7 +124,7 @@ public class GameManager {
     }
 
     /**
-     * this inner mwthod counts the mafias left in game
+     * this inner method counts the mafias left in game
      * @return
      */
     private int mafiaCounter(){
@@ -161,7 +163,7 @@ public class GameManager {
             if (p.isAlive())
             {
                 if (p.equals(player))
-                    stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append('n').append(ANSI_RESET);
+                    stringBuilder.append(ANSI_BLACK).append(i).append(")").append(p.getUsername()).append('\n').append(ANSI_RESET);
                 else
                 stringBuilder.append(i).append(")").append(p.getUsername()).append('\n');
 
@@ -173,26 +175,61 @@ public class GameManager {
     /**
      * this method is supposed to be the main method to do the tasks while game is in phaze VOTING
      */
-    public void votingSystem(){
+    public Player votingSystem(){
         ArrayList<Player> alivePlayers = getAlivePlayers();
         ArrayList<Vote> votes = new ArrayList<>();
         for (Player p: alivePlayers)
         {
-            votes.add(new Vote(p.getUsername()));
+            votes.add(new Vote(p));
         }
         voteCount(votes);
+        Vote mostVote = sort(votes);
+        Player result;
+        if (sameCountCheck(mostVote,votes))
+            result=null;
+        else
+            result = mostVote.getPlayer();
 
-
+        return result;
     }
+
+
     private void voteCount(ArrayList<Vote> voteset){
         for (Vote v:voteset)
         {
             for(Map.Entry<Player,String> entry :votes.entrySet())
             {
-                if (entry.getValue().equals(v.getName()))
+                    if (entry.getValue().equals(v.getPlayer().getUsername()))
                     v.addCount();
             }
         }
+    }
+    private Vote sort(ArrayList<Vote> voteset){
+        Vote vote=null;
+        for (Vote v: voteset)
+        {
+            for (Vote vote1:voteset)
+            {
+                if (v.getCount()>=vote1.getCount()){
+                    vote = v;
+                }
+                else
+                    vote = vote1;
+            }
+        }
+        return vote;
+
+    }
+    private boolean sameCountCheck(Vote vote,ArrayList<Vote> voteset){
+        boolean hasSameCount = false;
+        for (Vote v:voteset){
+            if (v.getCount()==vote.getCount())
+            {
+                hasSameCount = true;
+                break;
+            }
+        }
+        return  hasSameCount;
     }
 
     /**
@@ -220,6 +257,13 @@ public class GameManager {
 
          return aliveMembers;
 
+    }
+    public boolean allHaveVoted(){
+        boolean voteFull = false;
+            if (votes.size()== getAlivePlayers().size())
+                voteFull = true;
+
+        return voteFull;
     }
 
 }

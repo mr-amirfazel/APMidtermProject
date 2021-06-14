@@ -13,4 +13,5 @@ public class Mayor extends Role{
     public void nightMove() {
 
     }
+
 }

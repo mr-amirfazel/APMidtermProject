@@ -295,6 +295,7 @@ public class God {
                         switch (gamePhaze) {
                             case DAY:
                                 day();
+                                switchPhaze();
                                 break;
                             case NIGHT:
                                 night();
@@ -305,14 +306,11 @@ public class God {
                                 switchPhaze();
                                 break;
                         }
-
-
                 }
               //  sendToAll(gameManager.gameOverStatement());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 
         }
 
@@ -329,7 +327,7 @@ public class God {
             long finish = start + 5*60*1000;
 
             try {
-                while (System.currentTimeMillis()<finish){
+                while (System.currentTimeMillis()<=finish){
                     tst = (String) objectInputStream.readObject();
                     sendToAll(name+" : "+tst);
                 }
@@ -339,7 +337,7 @@ public class God {
                 e.printStackTrace();
             }
 
-            switchPhaze();
+
         }
 
         /**
@@ -363,14 +361,28 @@ public class God {
             }
             String tst="";
             try {
-                tst = (String)objectInputStream.readObject();
-                gameManager.voteInit();
-                if(tst.equals(name))
-                    gameManager.getVotes().put(playerByName(name),"INVALID");
-                else if (nameExist(tst))
-                    gameManager.getVotes().put(playerByName(name),tst);
-                else
-                    gameManager.getVotes().put(playerByName(name),"INVALID");
+                long start = System.currentTimeMillis();
+                long finish = start + 3*60*1000;
+                while(System.currentTimeMillis()<=finish) {
+                    tst = (String) objectInputStream.readObject();
+                    gameManager.voteInit();
+                    if (tst.equals(name))
+                        gameManager.getVotes().put(playerByName(name), "INVALID");
+                    else if (nameExist(tst))
+                        gameManager.getVotes().put(playerByName(name), tst);
+                    else
+                        gameManager.getVotes().put(playerByName(name), "INVALID");
+                }
+                if(gameManager.allHaveVoted()){
+                Player resultPlayer = gameManager.votingSystem();
+                    if (resultPlayer != null)
+                        mayorDecision(resultPlayer);
+
+                }
+
+
+
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -415,6 +427,32 @@ public class God {
                 }
             return exists;
         }
+       private void mayorDecision(Player player)
+       {
+            for (int i = 0;i<gameManager.getPlayers().size();i++)
+            {
+                if ((gameManager.getPlayers().get(i).getRole() instanceof Mayor)&&(gameManager.getPlayers().get(i).isAlive()))
+                {
+                        sendToClient("the most voted player is: "+player.getUsername()+"\n do you mind to cancel the voting?",i);
+                    try {
+                        String response = (String)objectInputStream.readObject();
+                        if(playerByName(name).getRole() instanceof Mayor)
+                        {
+                            if (!response.equals("yes"))
+                            {
+                                player.setAlive(false);
+                                player.setCanChat(false);
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+       }
 
     }
 }

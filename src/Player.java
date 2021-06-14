@@ -5,10 +5,12 @@ public class Player {
     private String username;
     private Role role;
     private boolean isAlive;
+    private boolean canChat;
 
     public Player(String username) {
         this.setUsername(username);
         this.isAlive = true;
+        this.canChat = true;
     }
 
     /**
@@ -65,5 +67,21 @@ public class Player {
      */
     public void setAlive(boolean alive) {
         isAlive = alive;
+    }
+
+    /**
+     * getter for the ability of a player to chat
+     * @return
+     */
+    public boolean isCanChat() {
+        return canChat;
+    }
+
+    /**
+     * setter for the ability for a player to chat
+     * @param canChat
+     */
+    public void setCanChat(boolean canChat) {
+        this.canChat = canChat;
     }
 }

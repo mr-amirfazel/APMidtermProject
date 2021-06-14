@@ -1,16 +1,11 @@
 public class Vote {
-    private String name;
+    private Player player;
     private int count;
 
-    /**
-     * constructor for Vote
-     * @param name
-     */
-    public Vote(String name) {
-        this.name = name;
-        this.count = 0;
+    public Vote(Player player) {
+        this.player = player;
+        this.count =0;
     }
-
     /**
      * increments count by one
      */
@@ -28,10 +23,10 @@ public class Vote {
     }
 
     /**
-     * getter for name
+     * getter for Player
      * @return
      */
-    public String getName() {
-        return name;
+    public Player getPlayer() {
+        return player;
     }
 }
