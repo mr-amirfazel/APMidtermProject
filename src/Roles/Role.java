@@ -2,9 +2,11 @@ package Roles;
 
 public abstract class Role {
     String role;
+    private boolean isSavedByDoc;
 
     public Role(String role) {
         this.role = role;
+        this.isSavedByDoc = false;
     }
 
     /**
@@ -16,5 +18,21 @@ public abstract class Role {
     @Override
     public String toString() {
         return role;
+    }
+
+    /**
+     * getter for isSavedByDoc
+     * @return
+     */
+    public boolean isSavedByDoc() {
+        return isSavedByDoc;
+    }
+
+    /**
+     * setter for isSavedByDoc
+     * @param savedByDoc
+     */
+    public void setSavedByDoc(boolean savedByDoc) {
+        isSavedByDoc = savedByDoc;
     }
 }

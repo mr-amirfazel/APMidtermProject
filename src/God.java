@@ -1,9 +1,8 @@
 import ChatRoom.ChatServer;
 import ChatRoom.RoleTag;
-import Roles.Doctor;
-import Roles.Mafia;
-import Roles.Mayor;
+import Roles.*;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -224,6 +223,18 @@ public class God {
         }
 
         /**
+         * this method sends a specified String message only to players with a mafia role
+         * @param msg
+         */
+        public void sendToMafias(String msg){
+            ArrayList<Integer> mafiaIndex = getMafias();
+            for (int i=0;i<mafiaIndex.size();i++)
+            {
+                sendToClient(msg, mafiaIndex.get(i));
+            }
+        }
+
+        /**
          * this method makes the mafia know each other
          * and majes the mayor to know the doctor
          */
@@ -236,12 +247,7 @@ public class God {
          * introduces the mafia team to other mafias
          */
         private void mafiaIntroduce() {
-            ArrayList<Integer> mafias = new ArrayList<>();
-            for (int i = 0; i < gameManager.getPlayers().size(); i++) {
-                if (gameManager.getPlayers().get(i).getRole() instanceof Mafia)
-                    mafias.add(i);
-            }
-
+            ArrayList<Integer> mafias = getMafias();
             for (int i = 0; i < mafias.size(); i++) {
                 for (int j = 0; j < mafias.size(); j++) {
                     if (i == j)
@@ -250,6 +256,14 @@ public class God {
                     sendToClient(gameManager.getPlayers().get(mafias.get(j)).toString(), mafias.get(i));
                 }
             }
+        }
+        private ArrayList<Integer> getMafias(){
+            ArrayList<Integer> mafias = new ArrayList<>();
+            for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                if (gameManager.getPlayers().get(i).getRole() instanceof Mafia)
+                    mafias.add(i);
+            }
+            return mafias;
         }
 
         /**
@@ -355,7 +369,177 @@ public class God {
          * this method is for managing the game while its on Phaze NIGHT
          * what happens in this method is what every players do in their night move
          */
-        public void night(){}
+        public void night(){
+            if (gameManager.isGameShelf()){
+                System.out.println("PHAZE : NIGHT");
+                sendToAll(ANSI_PURPLE+"its Night.\nif youre role has a night task,prepare for mission :)"+ANSI_RESET);
+            }
+            mafiaChat();
+           mafiaAttack();
+           lecterSave();
+
+
+        }
+
+        /**
+         * first thing that happens when game goes to PHaze NIGHT is that mafias talk and then decide a player to get out of the game
+         */
+        public void mafiaChat(){
+           sendToMafias(ANSI_YELLOW+"you are part of the mafiaTeam.\nyou have 3 minutes to make a decision.\nwhen You came into a conclusion," +
+                   "send \"MAFFINISH\""+ANSI_RESET);
+            long start = System.currentTimeMillis();
+            long finish = start+ 3*60*1000;
+            String tst ;
+            while(System.currentTimeMillis()<=finish){
+                try {
+                    tst = (String) objectInputStream.readObject();
+                    if (playerByName(name).getRole() instanceof Mafia)
+                    {
+                        sendToMafias(name+" : "+tst);
+                        if (tst.equals("MAFFINISH"))
+                            break;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        /**
+         * this method is specified to kill a player when its night and mafias have the shot
+         */
+        private void mafiaAttack(){
+            String tst ;
+            long start = System.currentTimeMillis();
+            long finish = start+40*1000;
+            while(System.currentTimeMillis()<=finish) {
+                if (gameManager.isGodFatherAlive()) {
+                    for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                        if (gameManager.getPlayers().get(i).getRole() instanceof GodFather)
+                            sendToClient(ANSI_YELLOW + "HI GODFATHER ,enter the name of player you wanna kill this night\nWhen done enter\"ATTACKOFF\"" + ANSI_RESET, i);
+                    }
+                    try {
+                        tst = (String) objectInputStream.readObject();
+                        if(playerByName(name).getRole() instanceof GodFather)
+                        {
+                            if (nameExist(tst))
+                            {
+                                Player p = playerByName(tst);
+                                p.setAlive(false);
+                                p.setCanChat(false);
+                                gameManager.getInterval().add(p);
+                            }
+                            else if(tst.equals("ATTACKOFF"))
+                                break;
+
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if (gameManager.isLecterAlive()) {
+                    for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                        if (gameManager.getPlayers().get(i).getRole() instanceof Lecter)
+                            sendToClient(ANSI_YELLOW + "HI LECTER ,since the godfather is dead you have to choose the player to kill,\nenter the name of player you wanna kill this night\nWhen done enter\"ATTACKOFF\"" + ANSI_RESET, i);
+                    }
+                    try {
+                        tst =(String) objectInputStream.readObject();
+                        if(playerByName(name).getRole() instanceof Lecter)
+                        {
+                            if (nameExist(tst))
+                            {
+                                Player p = playerByName(tst);
+                                p.setAlive(false);
+                                p.setCanChat(false);
+                                gameManager.getInterval().add(p);
+                            }
+                            else if(tst.equals("ATTACKOFF"))
+                                break;
+
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                        if (gameManager.getPlayers().get(i).getRole() instanceof SimpleMafia)
+                            sendToClient(ANSI_YELLOW + "HI Random simple mafia ,since the godfather is dead you have to choose the player to kill,\nenter the name of player you wanna kill this night\nWhen done enter\"ATTACKOFF\"" + ANSI_RESET, i);
+                    }
+                    try {
+                        tst =(String) objectInputStream.readObject();
+                        if(playerByName(name).getRole() instanceof SimpleMafia)
+                        {
+                            if (nameExist(tst))
+                            {
+                                Player p = playerByName(tst);
+                                p.setAlive(false);
+                                p.setCanChat(false);
+                                gameManager.getInterval().add(p);
+                            }
+                            else if(tst.equals("ATTACKOFF"))
+                                break;
+
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        public void lecterSave(){
+            String tst;
+            if(gameManager.isLecterAlive())
+            {
+                for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
+                    if (gameManager.getPlayers().get(i).getRole() instanceof Lecter)
+                    {
+                        sendToClient(ANSI_YELLOW+"HI LECTER,time to save someone of your team\nNOTES:1)dont write a name that doesnt exist\n" +
+                                "2)dont save a player that is not a part of your team\n" +
+                                "3)be sure to enter\"MAFSAVE\" after youre done!!\n" +
+                                "4)you have 1 minutes to do it" +
+                                "5))))GOOD LUCK!!!!"+ANSI_RESET,i);
+                    }
+                }
+                try {
+                    long start = System.currentTimeMillis();
+                    long finish = start+2*60*1000;
+                    while (System.currentTimeMillis()<=finish) {
+                        tst = (String) objectInputStream.readObject();
+                        if (playerByName(name).getRole() instanceof Lecter) {
+                            if (nameExist(tst)) {
+                                if (playerByName(tst).getRole() instanceof Mafia) {
+                                    if (playerByName(tst).getRole() instanceof Lecter) {
+                                        if (!((Lecter) playerByName(tst).getRole()).isSelfSaved()) {
+                                            ((Lecter) playerByName(tst).getRole()).setSelfSaved(true);
+
+                                        }
+                                    }
+                                    ((Mafia) playerByName(tst).getRole()).setSavedByLecter(true);
+
+                                }
+                            } else if (tst.equals("MAFSAVE"))
+                                break;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        }
 
         /**
          * this method will start working right after DAY Phaze and the CHATROOM time ends
@@ -399,6 +583,7 @@ public class God {
                     else if(tst.equals("DONE"))
                     {
                         sendToAll(name+" : "+ANSI_BLUE+tst+ANSI_RESET);
+                        break;
                     }
                     else{
                         gameManager.getVotes().put(playerByName(name), "INVALID");

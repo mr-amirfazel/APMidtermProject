@@ -1,37 +1,45 @@
 import Roles.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class GameManager {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     private static final int MAXUSERS = 3;
     private ArrayList<String> readySets;
-    private ArrayList<Player> players;
+    private Vector<Player> players;
     private ArrayList<Role> roles;
-    private ArrayList<Player> outPlayers;
+    private Vector<Player> outPlayers;
     private boolean gameShelf;
     private HashMap<Player,String> votes;
+    private Vector<Player> interval;
     private int readyVoteCount;
 
     public GameManager() {
         readySets = new ArrayList<>();
-        players = new ArrayList<>();
+        players = new Vector<>();
         roles = new ArrayList<>();
-        outPlayers = new ArrayList<>();
+        outPlayers = new Vector<>();
+        interval = new Vector<>();
         initialRoles();
         shuffleRoles();
         this.gameShelf = false;
     }
 
     /**
+     * getter for interval
+     * the Vector which saves the players who might get saved by doctor later
+     * @return
+     */
+    public Vector<Player> getInterval() {
+        return interval;
+    }
+
+    /**
      * getter for the players that are not alive anymore and out of the game
      * @return
      */
-    public ArrayList<Player> getOutPlayers() {
+    public Vector<Player> getOutPlayers() {
         return outPlayers;
     }
 
@@ -116,7 +124,7 @@ public class GameManager {
      *
      * @return
      */
-    public ArrayList<Player> getPlayers() {
+    public Vector<Player> getPlayers() {
         return players;
     }
 
@@ -292,6 +300,22 @@ public class GameManager {
                 voteFull = true;
 
         return voteFull;
+    }
+    public boolean isGodFatherAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof GodFather)
+                isAlive = p.isAlive();
+
+            return isAlive;
+    }
+    public boolean isLecterAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof Lecter)
+                isAlive = p.isAlive();
+
+            return isAlive;
     }
 
 }
