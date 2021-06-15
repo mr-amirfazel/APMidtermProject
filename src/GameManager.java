@@ -15,6 +15,7 @@ public class GameManager {
     private ArrayList<Player> outPlayers;
     private boolean gameShelf;
     private HashMap<Player,String> votes;
+    private int readyVoteCount;
 
     public GameManager() {
         readySets = new ArrayList<>();
@@ -24,6 +25,14 @@ public class GameManager {
         initialRoles();
         shuffleRoles();
         this.gameShelf = false;
+    }
+
+    /**
+     * getter for the players that are not alive anymore and out of the game
+     * @return
+     */
+    public ArrayList<Player> getOutPlayers() {
+        return outPlayers;
     }
 
     /**
@@ -170,6 +179,25 @@ public class GameManager {
                 i++;
             }
         return stringBuilder.toString();
+    }
+
+    /**
+     * getter for readyVoteCount
+     * @return
+     */
+    public int getReadyVoteCount() {
+        return readyVoteCount;
+    }
+
+    /**
+     * setter for ReadyVoteCount
+     * @param readyVoteCount
+     */
+    public void setReadyVoteCount(int readyVoteCount) {
+        this.readyVoteCount = readyVoteCount;
+    }
+    public void incrementReadyVoteCount(){
+        setReadyVoteCount(getReadyVoteCount()+1);
     }
 
     /**

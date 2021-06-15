@@ -43,6 +43,7 @@ public class God {
                 String name;
                 name =playerAdd();
                 names.add(name);
+                if(userCounter<MAXUSERS)
                 gameManager.addPlayer(new Player(name));
                 System.out.println(name + " is connected from port: " + socket.getPort());
                 String c = (String) objectInputStream.readObject();
@@ -319,18 +320,28 @@ public class God {
          * aka the CHATROOM of the game
          */
         public void day(){
-            System.out.println("PHAZE : DAY");
-            if (gameManager.isGameShelf())
-            sendToAll(ANSI_RED + "Entered chatroom__type something" + ANSI_RESET);
+
+            if (gameManager.isGameShelf()){
+                System.out.println("PHAZE : DAY");
+                sendToAll(ANSI_RED + "Entered chatroom__type something \nyou have 5 minutes \nenter\"READY\" for Voting" + ANSI_RESET);
+            }
             String tst="";
             long start = System.currentTimeMillis();
             long finish = start + 5*60*1000;
-
+           // gameManager.setReadyVoteCount(0);
             try {
-                while (System.currentTimeMillis()<=finish){
-                    tst = (String) objectInputStream.readObject();
-                    sendToAll(name+" : "+tst);
-                }
+                while (System.currentTimeMillis()<=finish) {
+                        tst = (String) objectInputStream.readObject();
+                        if (tst.equals("READY")) {
+                            sendToAll(name + ":" + ANSI_RED + tst + ANSI_RESET);
+                            sendToAll(name+ANSI_WHITE+" has decided to vote.Other players can chat"+ANSI_RESET);
+                                break;
+
+                        } else
+                            sendToAll(name + " : " + tst);
+                    }
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
@@ -353,36 +364,63 @@ public class God {
          * and if we end up to a tie it wont do anything
          */
         public void voting(){
-            System.out.println("PHAZE : VOTING");
-            if (gameManager.isGameShelf())
-            sendToAll(ANSI_BLUE+"Entered Voting Area  ------- enter the name of who U think is Mafia\n Note not to vote for yourself or a wrong name"+ANSI_RESET);
+
+            if (gameManager.isGameShelf()) {
+                System.out.println("PHAZE : VOTING");
+                sendToAll(ANSI_BLUE + "Entered Voting Area \nenter the name of who U think is Mafia\n" +
+                        " Note not to vote for yourself or a wrong name \n" +
+                        "if you dont want to vote anyone off,just type \"NOVOTE\"\n" +
+                        "\n yo can change your vote as many times as you demand." +
+                        "\nwhen you're sure about your vote please enter \"DONE\"" +
+                        "----you have 30 seconds---" + ANSI_RESET);
+            }
             for (int i = 0; i <clients.size() ; i++) {
                 sendToClient(gameManager.remainingPlayers(i),i);
             }
             String tst="";
             try {
                 long start = System.currentTimeMillis();
-                long finish = start + 3*60*1000;
+                long finish = start + 30*1000;
                 while(System.currentTimeMillis()<=finish) {
                     tst = (String) objectInputStream.readObject();
                     gameManager.voteInit();
-                    if (tst.equals(name))
+                    if (tst.equals(name)){
                         gameManager.getVotes().put(playerByName(name), "INVALID");
-                    else if (nameExist(tst))
+                        sendToAll(name+" voted to himself "+ANSI_BLACK+"  ///INVALIDVOTE///"+ANSI_RESET);
+                    }
+                    else if (nameExist(tst)){
                         gameManager.getVotes().put(playerByName(name), tst);
-                    else
+                        sendToAll(name+" voted --> "+tst);
+                    }
+                    else if (tst.equals("NOVOTE")){
+                        gameManager.getVotes().put(playerByName(name), tst);
+                        sendToAll(name+" didn't vote!!!!!!!");
+                    }
+                    else if(tst.equals("DONE"))
+                    {
+                        sendToAll(name+" : "+ANSI_BLUE+tst+ANSI_RESET);
+                    }
+                    else{
                         gameManager.getVotes().put(playerByName(name), "INVALID");
+                        sendToAll(name+" made a false vote "+ANSI_BLACK+"  ///INVALIDVOTE///"+ANSI_RESET);
+                    }
                 }
                 if(gameManager.allHaveVoted()){
                 Player resultPlayer = gameManager.votingSystem();
                     if (resultPlayer != null)
-                        mayorDecision(resultPlayer);
+                    {
+                        if (isMayorAlive())
+                            mayorDecision(resultPlayer);
+                        else
+                        {
+                            kickPlayer(resultPlayer);
+                        }
 
+
+                    }
+
+                    sendToAll("The voting has ended");
                 }
-
-
-
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -409,6 +447,11 @@ public class God {
             }
         }
 
+        /**
+         * searches among the players and return the one with the same name as parameter
+         * @param name
+         * @return
+         */
         private Player playerByName(String name){
             Player player=null;
             for(Player p:gameManager.getPlayers())
@@ -417,21 +460,27 @@ public class God {
 
                 return player;
         }
+
         private boolean nameExist(String name){
             boolean exists = false;
 
             for(Player p: gameManager.getPlayers())
-                if(p.getUsername().equals(name)) {
+                if(p.getUsername().equals(name)&& p.isAlive()) {
                     exists = true;
                     break;
                 }
             return exists;
         }
+
+        /**
+         * this method will get what mayor decides about the voting results and apply them
+         * @param player
+         */
        private void mayorDecision(Player player)
        {
             for (int i = 0;i<gameManager.getPlayers().size();i++)
             {
-                if ((gameManager.getPlayers().get(i).getRole() instanceof Mayor)&&(gameManager.getPlayers().get(i).isAlive()))
+                if ((gameManager.getPlayers().get(i).getRole() instanceof Mayor))
                 {
                         sendToClient("the most voted player is: "+player.getUsername()+"\n do you mind to cancel the voting?",i);
                     try {
@@ -440,8 +489,7 @@ public class God {
                         {
                             if (!response.equals("yes"))
                             {
-                                player.setAlive(false);
-                                player.setCanChat(false);
+                                kickPlayer(player);
                             }
                         }
                     } catch (IOException e) {
@@ -452,6 +500,31 @@ public class God {
                 }
             }
 
+       }
+
+        /**
+         * this method checks if mayor is alive so we can use his action in agme
+         * @return
+         */
+       private boolean isMayorAlive(){
+            boolean isAlive = false;
+            for (Player p :gameManager.getPlayers())
+                if ((p.getRole() instanceof Mayor)&& p.isAlive())
+                {
+                    isAlive = true;
+                    break;
+                }
+            return isAlive;
+       }
+
+        /**
+         * this method kicks(remove,kill,...) a player out of the game
+         * @param player
+         */
+       private void kickPlayer(Player player){
+           player.setAlive(false);
+           player.setCanChat(false);
+           gameManager.getOutPlayers().add(player);
        }
 
     }
