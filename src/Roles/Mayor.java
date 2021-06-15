@@ -1,8 +1,10 @@
 package Roles;
 
 public class Mayor extends Role{
+
     public Mayor() {
         super("Mayor");
+
     }
 
     /**
@@ -13,5 +15,6 @@ public class Mayor extends Role{
     public void nightMove() {
 
     }
+
 
 }

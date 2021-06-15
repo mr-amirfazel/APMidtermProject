@@ -14,6 +14,7 @@ public class GameManager {
     private HashMap<Player,String> votes;
     private Vector<Player> interval;
     private int readyVoteCount;
+    private boolean dieHardRequest;
 
     public GameManager() {
         readySets = new ArrayList<>();
@@ -24,6 +25,7 @@ public class GameManager {
         initialRoles();
         shuffleRoles();
         this.gameShelf = false;
+        this.dieHardRequest = false;
     }
 
     /**
@@ -309,6 +311,7 @@ public class GameManager {
 
             return isAlive;
     }
+
     public boolean isLecterAlive(){
         boolean isAlive=false;
         for (Player p:players)
@@ -317,5 +320,60 @@ public class GameManager {
 
             return isAlive;
     }
+        public boolean isِDoctorAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof Doctor)
+                isAlive = p.isAlive();
 
+            return isAlive;
+      }
+public boolean isِDetectiveAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof Detective)
+                isAlive = p.isAlive();
+
+            return isAlive;
+      }
+public boolean isِSniperAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof Sniper)
+                isAlive = p.isAlive();
+
+            return isAlive;
+      }
+      public boolean isPsychiatristAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof Psychiatrist)
+                isAlive = p.isAlive();
+
+            return isAlive;
+      }
+ public boolean isDieHardAlive(){
+        boolean isAlive=false;
+        for (Player p:players)
+            if (p.getRole() instanceof DieHard)
+                isAlive = p.isAlive();
+
+            return isAlive;
+      }
+
+    /**
+     * getter for DieHardRequest
+     * @return
+     */
+    public boolean isDieHardRequest() {
+        return dieHardRequest;
+    }
+
+    /**
+     * setter for DieHardRequest
+     * @param dieHardRequest
+     */
+    public void setDieHardRequest(boolean dieHardRequest) {
+        this.dieHardRequest = dieHardRequest;
+    }
 }

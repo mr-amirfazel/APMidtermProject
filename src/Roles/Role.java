@@ -3,10 +3,12 @@ package Roles;
 public abstract class Role {
     String role;
     private boolean isSavedByDoc;
+    private boolean isSilencedByPshychiatrist;
 
     public Role(String role) {
         this.role = role;
         this.isSavedByDoc = false;
+        this.isSilencedByPshychiatrist = false;
     }
 
     /**
@@ -34,5 +36,21 @@ public abstract class Role {
      */
     public void setSavedByDoc(boolean savedByDoc) {
         isSavedByDoc = savedByDoc;
+    }
+
+    /**
+     * getter for isSilencedByPshychiatrist
+     * @return
+     */
+    public boolean isSilencedByPshychiatrist() {
+        return isSilencedByPshychiatrist;
+    }
+
+    /**
+     * setter for isSilencedByPshychiatrist
+     * @param silencedByPshychiatrist
+     */
+    public void setSilencedByPshychiatrist(boolean silencedByPshychiatrist) {
+        isSilencedByPshychiatrist = silencedByPshychiatrist;
     }
 }

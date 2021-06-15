@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StringBufferInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -377,6 +378,11 @@ public class God {
             mafiaChat();
            mafiaAttack();
            lecterSave();
+           doctorSave();
+           detectiveAnnounce();
+           sniperShot();
+           psychiatristMove();
+           dieHardMove();
 
 
         }
@@ -496,6 +502,10 @@ public class God {
                 }
             }
         }
+
+        /**
+         * this method does all the tasks in order to save a member of the mafia team in case the sniper shots one of them
+         */
         public void lecterSave(){
             String tst;
             if(gameManager.isLecterAlive())
@@ -538,6 +548,233 @@ public class God {
                 }
 
 
+            }
+        }
+
+        /**
+         * this method does all the tasks that the doctor has to do to save a member of
+         * the game(citizen or mafia) in case they get shot by a mafia member(GODFATHER)
+         */
+        public void doctorSave(){
+            String tst;
+                if (gameManager.isِDoctorAlive())
+                {
+                    for (int i = 0; i <gameManager.getPlayers().size() ; i++) {
+                        if(gameManager.getPlayers().get(i).getRole() instanceof  Doctor)
+                            sendToClient(ANSI_YELLOW+"HI DOC its our turn to save someone\nNOTES: 1)save a player who is alive" +
+                                    "\n2)dont save a mafia\n3)dont try to save a player who doesnt exist\n" +
+                                    "4)you have 2 minutes\n5)send\"CITSAVE\" after done saving"+ANSI_RESET,i);
+                    }
+                    try {
+                        long start = System.currentTimeMillis();
+                        long finish = start +2*60*1000;
+                        while(System.currentTimeMillis()<=finish){
+                            tst = (String)objectInputStream.readObject();
+                            if(playerByName(name).getRole() instanceof Doctor)
+                            {
+                                if(nameExist(tst)){
+                                    if(!(playerByName(tst).getRole() instanceof Mafia))
+                                    {
+                                        if (playerByName(tst).getRole() instanceof Doctor)
+                                        {
+                                            if (!((Doctor) playerByName(tst).getRole()).isSelfSaved())
+                                            {
+                                                ((Doctor) playerByName(tst).getRole()).setSelfSaved(true);
+                                            }
+                                        }
+                                        playerByName(tst).getRole().setSavedByDoc(true);
+                                    }
+                                }
+                                else if(tst.equals("CITSAVE"))
+                                    break;
+                            }
+                        }
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+        }
+
+        /**
+         * this method does all the tasks for a detective and tell him if someone is a mafia or not
+         */
+        public void detectiveAnnounce(){
+            String tst;
+            if(gameManager.isِDetectiveAlive()) {
+                int index = 0;
+                for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                    if (gameManager.getPlayers().get(i).getRole() instanceof Detective) {
+                        sendToClient(ANSI_YELLOW + "HI DETECTIVE you can get the inquiry of a player here\nNOTES: 1)send a player who is valid and alive\n" +
+                                "2) send\"DECDONE\" when you are finished\n" +
+                                "3) you have 1 minute" + ANSI_RESET, i);
+                        index = i;
+                    }
+
+                }
+
+                try {
+                    long start = System.currentTimeMillis();
+                    long finish = start + 60 * 1000;
+                    while (System.currentTimeMillis() <= finish) {
+                        tst = (String) objectInputStream.readObject();
+                        if (playerByName(name).getRole() instanceof Detective) {
+                            String result = "";
+                            if (nameExist(tst)) {
+                                if ((playerByName(tst).getRole() instanceof Lecter) || (playerByName(tst).getRole() instanceof SimpleMafia))
+                                    result = tst + " is: " + ANSI_GREEN + "MAFIA" + ANSI_RESET;
+                                else
+                                    result = tst + " is: " + ANSI_GREEN + "CITIZEN" + ANSI_RESET;
+
+                                sendToClient(result, index);
+                            }
+                            else if(tst.equals("DECDONE"))
+                                break;
+
+                        }
+
+
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /**
+         * this method does all the tasks required for the sniper to shoot someone in the night
+         */
+        public void sniperShot(){
+            String tst;
+            if(gameManager.isِSniperAlive())
+            {
+                for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                    if (gameManager.getPlayers().get(i).getRole() instanceof Sniper) {
+                        sendToClient(ANSI_YELLOW+"HI SNIPER,its your turn of the night to shoot a mafia if you make a mistake yu die\nNOTES: " +
+                                "1) choose a alive and valid player\n" +
+                                "2)send \"SNIPDONE\" after choosing the player\n3)you have 30 seconds"+ANSI_RESET,i);
+                    }
+
+                }
+                try {
+                    long start = System.currentTimeMillis();
+                    long finish = start + 30 * 1000;
+                    while (System.currentTimeMillis()<=finish){
+                    tst = (String)objectInputStream.readObject();
+                    if(playerByName(name).getRole() instanceof Sniper)
+                    {
+                        if(nameExist(tst)){
+                            if (playerByName(tst).getRole() instanceof Mafia)
+                            {
+                                gameManager.getInterval().add(playerByName(tst));
+                            }
+                            else
+                                gameManager.getInterval().add(playerByName(name));
+                        }
+                        else if(tst.equals("SNIPDONE"))
+                        {
+                            break;
+                        }
+                    }
+
+
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+
+        /**
+         * this methods consists every tasks required for the psychiatrist to do his/her job
+         */
+        public void psychiatristMove(){
+            String tst;
+            if(gameManager.isPsychiatristAlive())
+            {
+                for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                    if (gameManager.getPlayers().get(i).getRole() instanceof Psychiatrist) {
+                        sendToClient(ANSI_YELLOW+"HI PSYCHIATRIST, its your turn to silence someone \nNOTES: 1) pick an alive and valid player\n" +
+                                "2)you can send \"NONE\" if you have no idea\n" +
+                                "3)you have 30 seconds\n4)enter\"PSYDONE\" after making your decision"+ANSI_RESET,i);
+                    }
+
+                }
+                try
+                {
+                    long start = System.currentTimeMillis();
+                    long finish = start + 30 * 1000;
+                    while (System.currentTimeMillis()<=finish){
+                    tst =(String) objectInputStream.readObject();
+                    if(playerByName(name).getRole() instanceof  Psychiatrist)
+                    {
+                        if(nameExist(tst)){
+                            playerByName(tst).getRole().setSilencedByPshychiatrist(true);
+                            playerByName(tst).setCanChat(false);
+                        }
+                        else if (tst.equals("PSYDONE"))
+                        {
+                            break;
+                        }
+                    }
+
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /**
+         * this method consists of every task required for the die hard move (the ability not to die is not applied yet)
+         */
+        public void dieHardMove(){
+            String tst;
+            if(gameManager.isDieHardAlive()){
+                gameManager.setDieHardRequest(false);
+                for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+                    if (gameManager.getPlayers().get(i).getRole() instanceof DieHard) {
+                        sendToClient(ANSI_YELLOW+"HI DIEHARD, its youre turn of the game\n" +
+                                "if you deman an announcement enter \"YES\"" +
+                                "\nif not, enter whatever you want\n" +
+                                "you have 30 seconds\nenter DIEDONE after you are done"+ANSI_RESET,i);
+                    }
+
+                }
+                try
+                {
+                    long start = System.currentTimeMillis();
+                    long finish = start + 30 * 1000;
+                    while (System.currentTimeMillis()<=finish){
+                        tst =(String) objectInputStream.readObject();
+                        if(playerByName(name).getRole() instanceof  DieHard)
+                        {
+                            if(tst.equals("YES"))
+                                gameManager.setDieHardRequest(true);
+                            else if (tst.equals("DIEDONE"))
+                            {
+                                break;
+                            }
+                        }
+
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
