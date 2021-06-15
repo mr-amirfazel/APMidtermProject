@@ -1,3 +1,10 @@
+/**
+ *this class provides many data and useful methods which is used by the server class to make connection and analysis among the datas
+ *
+ * @author fazel
+ * @version 1.0
+ */
+
 import Roles.*;
 
 import java.util.*;
@@ -5,7 +12,7 @@ import java.util.*;
 public class GameManager {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
-    private static final int MAXUSERS = 3;
+    private static final int MAXUSERS = 10;
     private ArrayList<String> readySets;
     private Vector<Player> players;
     private ArrayList<Role> roles;
@@ -239,6 +246,8 @@ public class GameManager {
             {
                     if (entry.getValue().equals(v.getPlayer().getUsername()))
                     v.addCount();
+                    else if(entry.getValue().equals("NOVOTE"))
+                        entry.getKey().incrementNoVote();
             }
         }
     }

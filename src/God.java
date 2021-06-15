@@ -1,3 +1,10 @@
+/**
+ * this the server side of the game also known as GOD
+ * it has data transmitition between clients and GameManager Class
+ * @author fazel
+ * @version 1.0
+ */
+
 import ChatRoom.ChatServer;
 import ChatRoom.RoleTag;
 import Roles.*;
@@ -18,7 +25,7 @@ import java.util.concurrent.Executors;
 public class God {
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    private static final int MAXUSERS = 3;
+    private static final int MAXUSERS = 10;
     private static Vector<SendAssist> clients = new Vector<>();
     private static ExecutorService pool = Executors.newFixedThreadPool(MAXUSERS);
     private GameManager gameManager;
@@ -305,8 +312,8 @@ public class God {
                     introductionNight();
                     gameManager.setGameShelf(true);
                     }
-              //  while (!gameManager.endGame())
-                while(true){
+                while (!gameManager.endGame())
+               {
 
                         switch (gamePhaze) {
                             case DAY:
@@ -323,7 +330,7 @@ public class God {
                                 break;
                         }
                 }
-              //  sendToAll(gameManager.gameOverStatement());
+              sendToAll(gameManager.gameOverStatement());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -876,11 +883,23 @@ public class God {
 
                     sendToAll("The voting has ended");
                 }
+               noVoteCheck();
 
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
+            }
+        }
+
+        /**
+         * this method kicks out players who dont vote in 3 round s
+         */
+        public void noVoteCheck(){
+            for (Player p:gameManager.getPlayers())
+            {
+                if (p.getNoVote()==3)
+                    kickPlayer(p);
             }
         }
 

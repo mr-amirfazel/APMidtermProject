@@ -1,3 +1,11 @@
+/**
+ *
+ * this is the clientSide wich connects to the Server throught the sockets and share and recieve data by streams
+ *
+ * @author fazel
+ * @version 1.0
+ */
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

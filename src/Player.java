@@ -6,11 +6,13 @@ public class Player {
     private Role role;
     private boolean isAlive;
     private boolean canChat;
+    private int noVote;
 
     public Player(String username) {
         this.setUsername(username);
         this.isAlive = true;
         this.canChat = true;
+        this.noVote =0;
     }
 
     /**
@@ -83,5 +85,21 @@ public class Player {
      */
     public void setCanChat(boolean canChat) {
         this.canChat = canChat;
+    }
+
+    /**
+     * this method increments the noVote count by one
+     */
+    public void incrementNoVote()
+    {
+        noVote++;
+    }
+
+    /**
+     * getter for noVote count
+     * @return
+     */
+    public int getNoVote() {
+        return noVote;
     }
 }
