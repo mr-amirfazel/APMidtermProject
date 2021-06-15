@@ -1,8 +1,10 @@
 package Roles;
 
 public class DieHard extends Role{
+    private int announceCount;
     public DieHard() {
         super("Diehard");
+        this.announceCount =0;
     }
 
     /**
@@ -12,5 +14,16 @@ public class DieHard extends Role{
     @Override
     public void nightMove() {
 
+    }
+    public void increment(){
+        announceCount++;
+    }
+
+    /**
+     * getter for announceCount
+     * @return
+     */
+    public int getAnnounceCount() {
+        return announceCount;
     }
 }

@@ -338,6 +338,18 @@ public class God {
 
             if (gameManager.isGameShelf()){
                 System.out.println("PHAZE : DAY");
+                if(gameManager.isDieHardRequest())
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("according to die hards announcement these are the roles which are out").append('\n');
+                    for (Player p:gameManager.getOutPlayers())
+                    {
+                        int i =1;
+                        stringBuilder.append(i).append(")").append(p.getRole().toString()).append('\n');
+                        i++;
+                    }
+                    sendToAll(stringBuilder.toString());
+                }
                 sendToAll(ANSI_RED + "Entered chatroom__type something \nyou have 5 minutes \nenter\"READY\" for Voting" + ANSI_RESET);
             }
             String tst="";
@@ -347,13 +359,15 @@ public class God {
             try {
                 while (System.currentTimeMillis()<=finish) {
                         tst = (String) objectInputStream.readObject();
-                        if (tst.equals("READY")) {
-                            sendToAll(name + ":" + ANSI_RED + tst + ANSI_RESET);
-                            sendToAll(name+ANSI_WHITE+" has decided to vote.Other players can chat"+ANSI_RESET);
+                        if(playerByName(name).isCanChat()) {
+                            if (tst.equals("READY")) {
+                                sendToAll(name + ":" + ANSI_RED + tst + ANSI_RESET);
+                                sendToAll(name + ANSI_WHITE + " has decided to vote.Other players can chat" + ANSI_RESET);
                                 break;
 
-                        } else
-                            sendToAll(name + " : " + tst);
+                            } else
+                                sendToAll(name + " : " + tst);
+                        }
                     }
 
 
@@ -375,6 +389,23 @@ public class God {
                 System.out.println("PHAZE : NIGHT");
                 sendToAll(ANSI_PURPLE+"its Night.\nif youre role has a night task,prepare for mission :)"+ANSI_RESET);
             }
+            for (Player p:gameManager.getPlayers())
+            {
+                if (p.getRole().isSilencedByPshychiatrist()){
+                    p.getRole().setSilencedByPshychiatrist(false);
+                    p.setCanChat(true);
+                }
+                if (p.getRole() instanceof Mafia)
+                {
+                    if(((Mafia) p.getRole()).isSavedByLecter())
+                        ((Mafia) p.getRole()).setSavedByLecter(false);
+                }
+                else if(!(p.getRole() instanceof Mafia))
+                {
+                    if(p.getRole().isSavedByDoc())
+                        p.getRole().setSavedByDoc(false);
+                    }
+            }
             mafiaChat();
            mafiaAttack();
            lecterSave();
@@ -383,6 +414,7 @@ public class God {
            sniperShot();
            psychiatristMove();
            dieHardMove();
+           applySavesAndKills();
 
 
         }
@@ -434,8 +466,6 @@ public class God {
                             if (nameExist(tst))
                             {
                                 Player p = playerByName(tst);
-                                p.setAlive(false);
-                                p.setCanChat(false);
                                 gameManager.getInterval().add(p);
                             }
                             else if(tst.equals("ATTACKOFF"))
@@ -762,7 +792,10 @@ public class God {
                         if(playerByName(name).getRole() instanceof  DieHard)
                         {
                             if(tst.equals("YES"))
-                                gameManager.setDieHardRequest(true);
+                                if (((DieHard) playerByName(name).getRole()).getAnnounceCount()<2){
+                                    gameManager.setDieHardRequest(true);
+                                    ((DieHard) playerByName(name).getRole()).increment();
+                                }
                             else if (tst.equals("DIEDONE"))
                             {
                                 break;
@@ -849,6 +882,31 @@ public class God {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+
+        /**
+         * this method applies all of the saves and kills that happened in one night
+         * being alive and continuing the game or getting out of the game
+         * all happens here
+         */
+        public void applySavesAndKills(){
+                for (Player p:gameManager.getInterval())
+                {
+                    if (p.getRole() instanceof Mafia)
+                    {
+                        if (((Mafia) p.getRole()).isSavedByLecter())
+                            continue;
+                    }
+                    else if(!(p.getRole() instanceof  Mafia))
+                    {
+                        if (p.getRole().isSavedByDoc())
+                            continue;
+                    }
+                    p.setAlive(false);
+                    p.setCanChat(false);
+                    gameManager.getOutPlayers().add(p);
+                }
+                gameManager.getInterval().clear();
         }
 
         /**
